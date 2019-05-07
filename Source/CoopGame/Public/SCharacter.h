@@ -8,6 +8,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class ASWeapon;
 
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter
@@ -30,11 +31,16 @@ protected:
 
 	void EndCrouch();
 
+	void DoFire();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	UCameraComponent* CameraComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* ArmComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
+	ASWeapon* CurrentWeapon;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -42,4 +48,5 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual FVector GetPawnViewLocation() const override;
 };

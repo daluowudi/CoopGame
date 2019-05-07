@@ -4,6 +4,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "SWeapon.h"
 // #include "GameFramework/NavMovementComponent.h"
 // #include "AI/Navigation/NavigationTypes.h"
 
@@ -53,6 +54,16 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("UnCrouch", IE_Released, this, &ASCharacter::EndCrouch);
 	
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::Jump);
+
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASCharacter::DoFire);
+}
+
+void ASCharacter::DoFire()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->Fire();	
+	}
 }
 
 void ASCharacter::MoveForward(float Value)
@@ -73,4 +84,14 @@ void ASCharacter::BeginCrouch()
 void ASCharacter::EndCrouch()
 {
 	UnCrouch();
+}
+
+FVector ASCharacter::GetPawnViewLocation() const
+{
+	if (CameraComp)
+	{
+		return CameraComp->GetComponentLocation();
+	}
+
+	return Super::GetPawnViewLocation();
 }
