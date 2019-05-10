@@ -4,6 +4,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 ASWeapon::ASWeapon()
@@ -15,6 +16,7 @@ ASWeapon::ASWeapon()
 	RootComponent = MeshComp;
 
 	MuzzleSocketName = "MuzzleSocket";
+	TraceSocketName = "BeamEnd";
 }
 
 // Called when the game starts or when spawned
@@ -45,9 +47,13 @@ void ASWeapon::Fire()
 		FVector ShootDirection = Rotation.Vector();
 		FVector EndPoint = StartPoint + ShootDirection * 10000.0;
 
+		FVector TraceEnd = EndPoint;
+
 		if (GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_Visibility, QueryParams))
 		{
 			UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 20.0, ShootDirection, Hit, MyOwner->GetInstigatorController(), MyOwner, DamageType);
+
+			TraceEnd = Hit.ImpactPoint;
 
 			if (ImpactEffect)
 			{
@@ -60,6 +66,14 @@ void ASWeapon::Fire()
 		if (MuzzleEffect)
 		{
 			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
+		}
+
+		if (TraceEffect)
+		{
+			FVector TraceLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
+
+			UParticleSystemComponent* ParticleComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TraceEffect, TraceLocation);
+			ParticleComponent->SetVectorParameter(TraceSocketName, TraceEnd);
 		}
 	}
 }
