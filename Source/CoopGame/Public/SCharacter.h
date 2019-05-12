@@ -33,6 +33,10 @@ protected:
 
 	void DoFire();
 
+	void DoZoom();
+
+	void UnZoom();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	UCameraComponent* CameraComp;
 
@@ -41,6 +45,16 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
 	ASWeapon* CurrentWeapon;
+
+	float bIsZoomed;
+
+	float DefaultsFOV;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player")
+	float ZoomedFOV;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Player", meta = (ClampMin = 0.1, ClampMax = 100))
+	float ZoomSpeed;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

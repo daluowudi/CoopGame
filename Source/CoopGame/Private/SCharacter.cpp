@@ -23,6 +23,9 @@ ASCharacter::ASCharacter()
 
 	//这个如果不说是很难发现的
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
+
+	ZoomedFOV = 65;
+	ZoomSpeed = 20;
 }
 
 // Called when the game starts or when spawned
@@ -30,13 +33,18 @@ void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	DefaultsFOV = CameraComp->FieldOfView;
 }
 
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	float TargetFOV = bIsZoomed ? ZoomedFOV : DefaultsFOV;
 
+	float NewFOV = FMath::FInterpTo(CameraComp->FieldOfView, TargetFOV, DeltaTime, ZoomSpeed);
+	CameraComp->SetFieldOfView(NewFOV);
 }
 
 // Called to bind functionality to input
@@ -56,6 +64,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::Jump);
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASCharacter::DoFire);
+
+	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &ASCharacter::DoZoom);
+	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &ASCharacter::UnZoom);
 }
 
 void ASCharacter::DoFire()
@@ -64,6 +75,16 @@ void ASCharacter::DoFire()
 	{
 		CurrentWeapon->Fire();	
 	}
+}
+
+void ASCharacter::DoZoom()
+{
+	bIsZoomed = true;
+}
+
+void ASCharacter::UnZoom()
+{
+	bIsZoomed = false;
 }
 
 void ASCharacter::MoveForward(float Value)
