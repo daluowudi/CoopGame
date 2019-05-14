@@ -26,6 +26,8 @@ ASCharacter::ASCharacter()
 
 	ZoomedFOV = 65;
 	ZoomSpeed = 20;
+
+	WeaponSocketName = "WeaponSocket";
 }
 
 // Called when the game starts or when spawned
@@ -34,6 +36,17 @@ void ASCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	DefaultsFOV = CameraComp->FieldOfView;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(StaterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
+	}
 }
 
 // Called every frame

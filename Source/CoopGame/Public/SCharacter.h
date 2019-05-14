@@ -43,9 +43,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* ArmComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
-	ASWeapon* CurrentWeapon;
-
 	float bIsZoomed;
 
 	float DefaultsFOV;
@@ -55,6 +52,14 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Player", meta = (ClampMin = 0.1, ClampMax = 100))
 	float ZoomSpeed;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
+	ASWeapon* CurrentWeapon;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<ASWeapon> StaterWeaponClass;
+
+	FName WeaponSocketName;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

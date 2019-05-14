@@ -26,13 +26,6 @@ ASWeapon::ASWeapon()
 	TraceSocketName = "BeamEnd";
 }
 
-// Called when the game starts or when spawned
-void ASWeapon::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
 void ASWeapon::Fire()
 {
 	AActor* MyOwner = GetOwner();
@@ -71,27 +64,25 @@ void ASWeapon::Fire()
 		if (DebugWeaponDrawing > 0)
 		{
 			DrawDebugLine(GetWorld(), StartPoint, EndPoint, FColor::White, false, 1, 0, 2);
-		}		
-
-		if (MuzzleEffect)
-		{
-			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
 		}
 
-		if (TraceEffect)
-		{
-			FVector TraceLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
-
-			UParticleSystemComponent* ParticleComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TraceEffect, TraceLocation);
-			ParticleComponent->SetVectorParameter(TraceSocketName, TraceEnd);
-		}
+		ApplyEffect(TraceEnd);
 	}
 }
 
-// Called every frame
-void ASWeapon::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+void ASWeapon::ApplyEffect(FVector TraceEnd)
+{	
+	// 枪口特效
+	if (MuzzleEffect)
+	{
+		UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
+	}
+	// 轨迹特效
+	if (TraceEffect)
+	{
+		FVector TraceLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
 
+		UParticleSystemComponent* ParticleComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TraceEffect, TraceLocation);
+		ParticleComponent->SetVectorParameter(TraceSocketName, TraceEnd);
+	}
 }
-
