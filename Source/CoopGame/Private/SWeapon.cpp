@@ -1,11 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SWeapon.h"
+#include "CoopGame.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Camera/CameraShake.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 
 static int32 DebugWeaponDrawing = 0;
 FAutoConsoleVariableRef CVARDebugWeaponDrawing(
@@ -41,7 +43,7 @@ void ASWeapon::Fire()
 		QueryParams.AddIgnoredActor(MyOwner);
 		QueryParams.AddIgnoredComponent(MeshComp);
 		QueryParams.bTraceComplex = true;
-		// QueryParams.bReturnPhysicalMaterial = true;
+		QueryParams.bReturnPhysicalMaterial = true;
 
 		MyOwner->GetActorEyesViewPoint(StartPoint, Rotation);
 		
@@ -56,9 +58,22 @@ void ASWeapon::Fire()
 
 			TraceEnd = Hit.ImpactPoint;
 
-			if (ImpactEffect)
+			EPhysicalSurface HitSurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
+			UParticleSystem* SelectedImpactEffect = nullptr;
+			switch(HitSurfaceType){
+				case SURFACE_FLESHDEFAULT:
+				case SURFACE_FLESHVULNERABLE:
+					SelectedImpactEffect = FleshImpactEffect;
+					break;
+				default:
+					SelectedImpactEffect = DefaultImpactEffect;
+					break;
+
+			}
+
+			if (SelectedImpactEffect)
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.ImpactPoint);				
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SelectedImpactEffect, Hit.ImpactPoint);				
 			}
 		}
 
