@@ -27,6 +27,20 @@ ASWeapon::ASWeapon()
 
 	MuzzleSocketName = "MuzzleSocket";
 	TraceSocketName = "BeamEnd";
+
+	BaseDamage = 20.0f;
+	HeadShootRatio = 3.0f;
+
+	ShootRate = 120.0f;
+}
+
+void ASWeapon::BeginPlay()
+{
+    Super::BeginPlay();
+
+	TimeBetweenShoot = 60 / ShootRate; 
+
+	LastShootTime = -TimeBetweenShoot;
 }
 
 void ASWeapon::Fire()
@@ -54,11 +68,14 @@ void ASWeapon::Fire()
 
 		if (GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_WEAPON, QueryParams))
 		{
-			UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 20.0, ShootDirection, Hit, MyOwner->GetInstigatorController(), MyOwner, DamageType);
+			EPhysicalSurface HitSurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
+
+			float HitDamage = HitSurfaceType == SURFACE_FLESHVULNERABLE ? BaseDamage : BaseDamage * HeadShootRatio;
+
+			UGameplayStatics::ApplyPointDamage(Hit.GetActor(), HitDamage, ShootDirection, Hit, MyOwner->GetInstigatorController(), MyOwner, DamageType);
 
 			TraceEnd = Hit.ImpactPoint;
 
-			EPhysicalSurface HitSurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
 			UParticleSystem* SelectedImpactEffect = nullptr;
 			switch(HitSurfaceType){
 				case SURFACE_FLESHDEFAULT:
@@ -94,7 +111,21 @@ void ASWeapon::Fire()
 		}
 
 		ApplyEffect(TraceEnd);
+
+		LastShootTime = GetWorld()->TimeSeconds;
 	}
+}
+
+void ASWeapon::StartFire()
+{
+	float FirstDelay = FMath::Max((LastShootTime + TimeBetweenShoot - GetWorld()->TimeSeconds), 0.0f);
+	
+	GetWorldTimerManager().SetTimer(TimerHandle_AutomaticFire, this, &ASWeapon::Fire, TimeBetweenShoot, true, FirstDelay);
+}
+
+void ASWeapon::StopFire()
+{
+	GetWorldTimerManager().ClearTimer(TimerHandle_AutomaticFire);
 }
 
 void ASWeapon::ApplyEffect(FVector TraceEnd)

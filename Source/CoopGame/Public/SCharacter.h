@@ -31,7 +31,9 @@ protected:
 
 	void EndCrouch();
 
-	void DoFire();
+	void StartFire();
+
+	void StopFire();
 
 	void DoZoom();
 
@@ -42,10 +44,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* ArmComp;
-
-	float bIsZoomed;
-
-	float DefaultsFOV;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player")
 	float ZoomedFOV;
@@ -58,6 +56,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<ASWeapon> StaterWeaponClass;
+
+	float bIsZoomed;
+
+	float DefaultsFOV;
 
 	FName WeaponSocketName;
 public:	
