@@ -40,6 +40,9 @@ protected:
 
 	void UnZoom();
 
+	UFUNCTION()
+	void OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	UCameraComponent* CameraComp;
 
@@ -61,7 +64,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<ASWeapon> StaterWeaponClass;
 
-	float bIsZoomed;
+	UPROPERTY(BlueprintReadOnly, Category = "Player")
+	bool bDied;
+
+	bool bIsZoomed;
 
 	float DefaultsFOV;
 

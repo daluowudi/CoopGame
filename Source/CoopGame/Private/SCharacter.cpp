@@ -5,6 +5,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "SWeapon.h"
+#include "CoopGame.h"
 #include "SHealthComponent.h"
 #include "Components/CapsuleComponent.h"
 
@@ -29,10 +30,12 @@ ASCharacter::ASCharacter()
 	//这个如果不说是很难发现的
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
-//    GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WEAPON, ECR_Ignore);
+  	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WEAPON, ECR_Ignore);
 
 	ZoomedFOV = 65;
 	ZoomSpeed = 20;
+
+	bDied = false;
 
 	WeaponSocketName = "WeaponSocket";
 }
@@ -42,6 +45,11 @@ void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (HealthComp)
+	{
+		HealthComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
+	}
+
 	DefaultsFOV = CameraComp->FieldOfView;
 
 	FActorSpawnParameters SpawnParams;
@@ -144,4 +152,20 @@ FVector ASCharacter::GetPawnViewLocation() const
 	}
 
 	return Super::GetPawnViewLocation();
+}
+
+void ASCharacter::OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
+{
+	if (Health < 0.0f && !bDied)
+	{
+		bDied = true;
+
+		GetMovementComponent()->StopMovementImmediately();
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		DetachFromControllerPendingDestroy();
+
+		SetLifeSpan(5);
+	}
+	UE_LOG(LogTemp, Log, TEXT("Now Health: %f"), Health);
 }

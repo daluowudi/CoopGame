@@ -70,7 +70,7 @@ void ASWeapon::Fire()
 		{
 			EPhysicalSurface HitSurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
 
-			float HitDamage = HitSurfaceType == SURFACE_FLESHVULNERABLE ? BaseDamage : BaseDamage * HeadShootRatio;
+			float HitDamage = HitSurfaceType == SURFACE_FLESHVULNERABLE ? BaseDamage * HeadShootRatio : BaseDamage;
 
 			UGameplayStatics::ApplyPointDamage(Hit.GetActor(), HitDamage, ShootDirection, Hit, MyOwner->GetInstigatorController(), MyOwner, DamageType);
 

@@ -7,7 +7,7 @@ USHealthComponent::USHealthComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	// PrimaryComponentTick.bCanEverTick = true;
 
 	DefaultHealth = 100.0f;
 }
@@ -33,7 +33,9 @@ void USHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, cons
 {
 	Health = FMath::Clamp(Health - Damage, 0.0f, DefaultHealth);
 
-	UE_LOG(LogTemp, Log, TEXT("Now Health: %f"), Health);
+	OnHealthChanged.Broadcast(this, Health, Damage, DamageType, InstigatedBy, DamageCauser);
+
+	// UE_LOG(LogTemp, Log, TEXT("Now Health: %f"), Health);
 }
 
 // Called every frame
