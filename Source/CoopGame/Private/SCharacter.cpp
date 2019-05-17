@@ -5,6 +5,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "SWeapon.h"
+#include "SHealthComponent.h"
+#include "Components/CapsuleComponent.h"
+
 // #include "GameFramework/NavMovementComponent.h"
 // #include "AI/Navigation/NavigationTypes.h"
 
@@ -21,8 +24,12 @@ ASCharacter::ASCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(ArmComp);
 
+	HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComp"));
+
 	//这个如果不说是很难发现的
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
+
+//    GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WEAPON, ECR_Ignore);
 
 	ZoomedFOV = 65;
 	ZoomSpeed = 20;
