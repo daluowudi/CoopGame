@@ -67,6 +67,9 @@ protected:
 	void ApplyEffect(FVector EndPoint);
 
 	void Fire();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerFire();
 public:	
 
 	void StartFire();

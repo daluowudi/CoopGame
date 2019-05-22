@@ -8,6 +8,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Camera/CameraShake.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
+#include "Net/UnrealNetwork.h"
 
 static int32 DebugWeaponDrawing = 0;
 FAutoConsoleVariableRef CVARDebugWeaponDrawing(
@@ -47,6 +48,12 @@ void ASWeapon::BeginPlay()
 
 void ASWeapon::Fire()
 {
+	if (!HasAuthority())
+	{
+		ServerFire();
+		// return;
+	}
+
 	AActor* MyOwner = GetOwner();
 
 	if (MyOwner)
@@ -145,4 +152,14 @@ void ASWeapon::ApplyEffect(FVector TraceEnd)
 		UParticleSystemComponent* ParticleComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TraceEffect, TraceLocation);
 		ParticleComponent->SetVectorParameter(TraceSocketName, TraceEnd);
 	}
+}
+
+void ASWeapon::ServerFire_Implementation()
+{
+	Fire();
+}
+
+bool ASWeapon::ServerFire_Validate()
+{
+	return true;
 }
