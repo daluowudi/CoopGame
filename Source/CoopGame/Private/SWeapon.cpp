@@ -32,6 +32,8 @@ ASWeapon::ASWeapon()
 	HeadShootRatio = 3.0f;
 
 	ShootRate = 120.0f;
+
+	SetReplicates(true);
 }
 
 void ASWeapon::BeginPlay()

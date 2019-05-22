@@ -58,7 +58,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Player", meta = (ClampMin = 0.1, ClampMax = 100))
 	float ZoomSpeed;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
 	ASWeapon* CurrentWeapon;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")

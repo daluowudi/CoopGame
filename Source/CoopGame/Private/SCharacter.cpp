@@ -8,6 +8,7 @@
 #include "CoopGame.h"
 #include "SHealthComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // #include "GameFramework/NavMovementComponent.h"
 // #include "AI/Navigation/NavigationTypes.h"
@@ -52,15 +53,18 @@ void ASCharacter::BeginPlay()
 
 	DefaultsFOV = CameraComp->FieldOfView;
 
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(StaterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-
-	if (CurrentWeapon)
+	if (HasAuthority())
 	{
-		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(StaterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+
+		if (CurrentWeapon)
+		{
+			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
+		}
 	}
 }
 
@@ -169,4 +173,11 @@ void ASCharacter::OnHealthChanged(USHealthComponent* OwningHealthComp, float Hea
 		SetLifeSpan(5);
 	}
 	UE_LOG(LogTemp, Log, TEXT("Now Health: %f"), Health);
+}
+
+void ASCharacter::GetLifetimeReplicatedProps( TArray< class FLifetimeProperty > & OutLifetimeProps ) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ASCharacter, CurrentWeapon);
 }
