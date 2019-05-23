@@ -121,6 +121,11 @@ void ASWeapon::Fire()
 
 		ApplyEffect(TraceEnd);
 
+		if (HasAuthority())
+		{
+	       	HitScanTrace.TraceTo = TraceEnd;
+		}
+
 		LastShootTime = GetWorld()->TimeSeconds;
 	}
 }
@@ -162,4 +167,16 @@ void ASWeapon::ServerFire_Implementation()
 bool ASWeapon::ServerFire_Validate()
 {
 	return true;
+}
+
+void ASWeapon::OnRep_HitScanTrace()
+{
+	ApplyEffect(HitScanTrace.TraceTo);
+}
+
+void ASWeapon::GetLifetimeReplicatedProps( TArray< class FLifetimeProperty > & OutLifetimeProps ) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ASWeapon, HitScanTrace);
 }
