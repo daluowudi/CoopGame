@@ -18,6 +18,12 @@ struct FHitScanTrace
 public:
 	UPROPERTY()
 	FVector_NetQuantize TraceTo;
+	// 是不是枚举类型的都需要声明为 TEnumAsByte<enumname> 呢
+	UPROPERTY()
+	TEnumAsByte<EPhysicalSurface> SurfaceType;
+
+	UPROPERTY()
+	bool bHitTarget;
 };
 
 UCLASS()
@@ -81,6 +87,7 @@ protected:
 	void OnRep_HitScanTrace();
 
 	void ApplyEffect(FVector EndPoint);
+	void ApplyImpulseEffect(bool bIsHit, FVector EndPoint, EPhysicalSurface HitSurFaceType);
 
 	void Fire();
 

@@ -75,9 +75,12 @@ void ASWeapon::Fire()
 
 		FVector TraceEnd = EndPoint;
 
+		EPhysicalSurface HitSurfaceType = SurfaceType_Default;
+		bool bIsHitedSomething = false;
 		if (GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_WEAPON, QueryParams))
 		{
-			EPhysicalSurface HitSurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
+            bIsHitedSomething = true;
+			HitSurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
 
 			float HitDamage = HitSurfaceType == SURFACE_FLESHVULNERABLE ? BaseDamage * HeadShootRatio : BaseDamage;
 
@@ -85,22 +88,7 @@ void ASWeapon::Fire()
 
 			TraceEnd = Hit.ImpactPoint;
 
-			UParticleSystem* SelectedImpactEffect = nullptr;
-			switch(HitSurfaceType){
-				case SURFACE_FLESHDEFAULT:
-				case SURFACE_FLESHVULNERABLE:
-					SelectedImpactEffect = FleshImpactEffect;
-					break;
-				default:
-					SelectedImpactEffect = DefaultImpactEffect;
-					break;
-
-			}
-
-			if (SelectedImpactEffect)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SelectedImpactEffect, Hit.ImpactPoint);				
-			}
+			ApplyImpulseEffect(bIsHitedSomething, TraceEnd, HitSurfaceType);
 		}
 
 		// UCameraShake
@@ -124,6 +112,8 @@ void ASWeapon::Fire()
 		if (HasAuthority())
 		{
 	       	HitScanTrace.TraceTo = TraceEnd;
+	       	HitScanTrace.SurfaceType = HitSurfaceType;
+	       	HitScanTrace.bHitTarget = bIsHitedSomething;
 		}
 
 		LastShootTime = GetWorld()->TimeSeconds;
@@ -152,11 +142,42 @@ void ASWeapon::ApplyEffect(FVector TraceEnd)
 	// 轨迹特效
 	if (TraceEffect)
 	{
-		FVector TraceLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
+		FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
 
-		UParticleSystemComponent* ParticleComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TraceEffect, TraceLocation);
+		UParticleSystemComponent* ParticleComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TraceEffect, MuzzleLocation);
 		ParticleComponent->SetVectorParameter(TraceSocketName, TraceEnd);
 	}
+}
+
+void ASWeapon::ApplyImpulseEffect(bool bIsHit, FVector EndPoint, EPhysicalSurface HitSurfaceType)
+{
+	/* 
+		不管用，如果加上这层判断的话，server射击时client无法看到受击效果
+		有点疑惑，为什么不能传过来，之后测试一下别的值
+	*/
+	// if (bIsHit)
+	// {	
+		UParticleSystem* SelectedImpactEffect = nullptr;
+		switch(HitSurfaceType){
+			case SURFACE_FLESHDEFAULT:
+			case SURFACE_FLESHVULNERABLE:
+				SelectedImpactEffect = FleshImpactEffect;
+				break;
+			default:
+				SelectedImpactEffect = DefaultImpactEffect;
+				break;
+
+		}
+
+        if (SelectedImpactEffect)
+        {
+			FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
+			FVector ShootDirection = EndPoint - MuzzleLocation;
+	        ShootDirection.Normalize();
+
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SelectedImpactEffect, EndPoint, ShootDirection.Rotation());
+        }
+	// }
 }
 
 void ASWeapon::ServerFire_Implementation()
@@ -172,11 +193,12 @@ bool ASWeapon::ServerFire_Validate()
 void ASWeapon::OnRep_HitScanTrace()
 {
 	ApplyEffect(HitScanTrace.TraceTo);
+	ApplyImpulseEffect(HitScanTrace.bHitTarget, HitScanTrace.TraceTo, HitScanTrace.SurfaceType);
 }
 
 void ASWeapon::GetLifetimeReplicatedProps( TArray< class FLifetimeProperty > & OutLifetimeProps ) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(ASWeapon, HitScanTrace);
+	DOREPLIFETIME_CONDITION(ASWeapon, HitScanTrace, COND_SkipOwner);
 }
