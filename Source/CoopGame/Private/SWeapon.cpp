@@ -34,6 +34,9 @@ ASWeapon::ASWeapon()
 
 	ShootRate = 120.0f;
 
+	NetUpdateFrequency = 66.0f;
+	MinNetUpdateFrequency = 30.0f;
+
 	SetReplicates(true);
 }
 
