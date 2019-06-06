@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "STrackerBot.generated.h"
 
+class UStaticMeshComponent;
+
 UCLASS()
 class COOPGAME_API ASTrackerBot : public APawn
 {
@@ -14,7 +16,9 @@ class COOPGAME_API ASTrackerBot : public APawn
 public:
 	// Sets default values for this pawn's properties
 	ASTrackerBot();
-
+	// visibility
+	UPROPERTY(EditdefaultsOnly, BlueprintReadOnly, Category="Components")
+	UStaticMeshComponent* MeshComp;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
