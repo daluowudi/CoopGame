@@ -39,6 +39,8 @@ ASCharacter::ASCharacter()
 	bDied = false;
 
 	WeaponSocketName = "WeaponSocket";
+
+	// SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -180,4 +182,5 @@ void ASCharacter::GetLifetimeReplicatedProps( TArray< class FLifetimeProperty > 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(ASCharacter, CurrentWeapon);
+	DOREPLIFETIME(ASCharacter, bDied);
 }
