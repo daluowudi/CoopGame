@@ -29,10 +29,3 @@ void ASTrackerBot::Tick(float DeltaTime)
 
 }
 
-// Called to bind functionality to input
-void ASTrackerBot::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-
