@@ -19,6 +19,17 @@ public:
 	// visibility
 	UPROPERTY(VisibleDefaultsOnly, Category="Components")
 	UStaticMeshComponent* MeshComp;
+
+	FVector NextPathPoint;
+
+	UPROPERTY(EditDefaultsOnly, Category="Move")
+	float ForceRate;
+
+	UPROPERTY(EditDefaultsOnly, Category="Move")
+	bool bUseVelocityChange;
+
+	UPROPERTY(EditDefaultsOnly, Category="Move")
+	float TriggerDistance;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

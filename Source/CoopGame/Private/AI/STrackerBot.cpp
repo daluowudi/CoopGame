@@ -18,6 +18,10 @@ ASTrackerBot::ASTrackerBot()
 	RootComponent = MeshComp;
 
 	MeshComp->SetCanEverAffectNavigation(false);
+	MeshComp->SetSimulatePhysics(true);
+
+	ForceRate = 1000.0f;
+	bUseVelocityChange = false;
 }
 
 // Called when the game starts or when spawned
@@ -25,6 +29,7 @@ void ASTrackerBot::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	NextPathPoint = GetNextPathPoint();
 }
 
 FVector ASTrackerBot::GetNextPathPoint()
@@ -46,5 +51,19 @@ void ASTrackerBot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// 
+	float Distance = (NextPathPoint - GetActorLocation()).Size();
+
+	if (Distance <= TriggerDistance)
+	{
+		NextPathPoint = GetNextPathPoint();
+	}else
+	{
+		FVector ForceDirection = NextPathPoint - GetActorLocation();
+
+		ForceDirection *= ForceRate;
+
+		MeshComp->AddForce(ForceDirection, NAME_None, bUseVelocityChange);
+	}
 }
 
