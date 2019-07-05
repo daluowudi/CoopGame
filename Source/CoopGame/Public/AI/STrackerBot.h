@@ -7,6 +7,7 @@
 #include "STrackerBot.generated.h"
 
 class UStaticMeshComponent;
+class USHealthComponent;
 
 UCLASS()
 class COOPGAME_API ASTrackerBot : public APawn
@@ -17,8 +18,11 @@ public:
 	// Sets default values for this pawn's properties
 	ASTrackerBot();
 	// visibility
-	UPROPERTY(VisibleDefaultsOnly, Category="Components")
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	UStaticMeshComponent* MeshComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USHealthComponent* HealthComp;
 
 	FVector NextPathPoint;
 
@@ -40,4 +44,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Navigation")
 	FVector GetNextPathPoint();
+
+	UFUNCTION()
+	void OnTakeDamage(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 };
