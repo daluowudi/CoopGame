@@ -77,5 +77,14 @@ void ASTrackerBot::Tick(float DeltaTime)
 
 void ASTrackerBot::OnTakeDamage(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
+	if (!MaterialInst)
+	{
+		MaterialInst = MeshComp->CreateAndSetMaterialInstanceDynamicFromMaterial(0, MeshComp->GetMaterial(0));
+	}
+	
+	if (MaterialInst)
+	{
+		MaterialInst->SetScalarParameterValue("LastHittedTime", GetWorld()->GetTimeSeconds());
+	}	
 	UE_LOG(LogTemp, Log, TEXT("Now TrackerBot Health: %f"), Health);	
 }
