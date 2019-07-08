@@ -25,6 +25,10 @@ ASTrackerBot::ASTrackerBot()
 
 	ForceRate = 1000.0f;
 	bUseVelocityChange = false;
+
+	bExplode = false;
+	ExplodeDamage = 50.0f;
+	ExplodeRadius = 50.0f;
 }
 
 // Called when the game starts or when spawned
@@ -87,4 +91,32 @@ void ASTrackerBot::OnTakeDamage(USHealthComponent* OwningHealthComp, float Healt
 		MaterialInst->SetScalarParameterValue("LastHittedTime", GetWorld()->GetTimeSeconds());
 	}	
 	UE_LOG(LogTemp, Log, TEXT("Now TrackerBot Health: %f"), Health);	
+
+	if (Health <= 0.0)
+	{
+		SelfDestruction();
+	}
+}
+
+void ASTrackerBot::SelfDestruction()
+{
+	if (bExplode)
+	{
+		return;
+	}
+
+	bExplode = true;
+
+	TArray<AActor*> IgnoreActors;
+	IgnoreActors.Add(this);
+
+	// damage
+	UGameplayStatics::ApplyRadialDamage(this, ExplodeDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoreActors, this);
+	// debug sphere
+	UKismetSystemLibrary::DrawDebugSphere(GetWorld(), GetActorLocation(), ExplodeRadius, 8, FColor::Red);
+
+	// effect
+	UGameplayStatics::SpawnEmitterAtLocation(this, ExplodeEffect, GetActorLocation());
+
+	Destroy();
 }

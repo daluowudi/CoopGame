@@ -9,6 +9,7 @@
 class UStaticMeshComponent;
 class USHealthComponent;
 class UMaterialInstanceDynamic;
+class UParticleSystem;
 
 UCLASS()
 class COOPGAME_API ASTrackerBot : public APawn
@@ -25,6 +26,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USHealthComponent* HealthComp;
 
+	UPROPERTY(VisibleAnywhere, Category = "Explode")
+	UParticleSystem* ExplodeEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Explode")
+	float ExplodeDamage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Explode")
+	float ExplodeRadius;
+
 	UMaterialInstanceDynamic* MaterialInst;
 
 	FVector NextPathPoint;
@@ -37,6 +47,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Move")
 	float TriggerDistance;
+
+	bool bExplode;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -50,4 +62,6 @@ public:
 
 	UFUNCTION()
 	void OnTakeDamage(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+	
+	void SelfDestruction();
 };
