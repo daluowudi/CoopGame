@@ -173,6 +173,8 @@ void ASCharacter::OnHealthChanged(USHealthComponent* OwningHealthComp, float Hea
 		DetachFromControllerPendingDestroy();
 
 		SetLifeSpan(5);
+		// 需要停火
+		StopFire();
 	}
 	UE_LOG(LogTemp, Log, TEXT("Now Health: %f"), Health);
 }
