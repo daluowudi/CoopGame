@@ -10,6 +10,7 @@ class UStaticMeshComponent;
 class USHealthComponent;
 class UMaterialInstanceDynamic;
 class UParticleSystem;
+class USphereComponent;
 
 UCLASS()
 class COOPGAME_API ASTrackerBot : public APawn
@@ -26,6 +27,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USHealthComponent* HealthComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USphereComponent* OverlapComp;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Explode")
 	UParticleSystem* ExplodeEffect;
 
@@ -34,6 +38,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Explode")
 	float ExplodeRadius;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Explode")
+	float SelfKillDamage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Explode")
+	float SelfKillInterval;
 
 	UMaterialInstanceDynamic* MaterialInst;
 
@@ -49,6 +59,9 @@ public:
 	float TriggerDistance;
 
 	bool bExplode;
+	bool bKillingSelf;
+
+	FTimerHandle TimerHandler;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -64,4 +77,8 @@ public:
 	void OnTakeDamage(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 	
 	void SelfDestruction();
+
+	void ApplySelfDamage();
+
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 };

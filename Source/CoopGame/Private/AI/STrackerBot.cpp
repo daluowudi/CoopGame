@@ -2,11 +2,13 @@
 
 #include "STrackerBot.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SphereComponent.h"
 #include "NavigationSystem.h"
 #include "NavigationPath.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "SHealthComponent.h"
+#include "SCharacter.h"
 
 
 // Sets default values
@@ -21,6 +23,12 @@ ASTrackerBot::ASTrackerBot()
 	MeshComp->SetCanEverAffectNavigation(false);
 	MeshComp->SetSimulatePhysics(true);
 
+	OverlapComp = CreateDefaultSubobject<USphereComponent>(TEXT("OverlapComp"));
+	OverlapComp->SetupAttachment(RootComponent);
+	OverlapComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	OverlapComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+	OverlapComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
 	HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComp"));
 
 	ForceRate = 1000.0f;
@@ -29,6 +37,8 @@ ASTrackerBot::ASTrackerBot()
 	bExplode = false;
 	ExplodeDamage = 50.0f;
 	ExplodeRadius = 50.0f;
+	SelfKillDamage = 20.0f;
+	SelfKillInterval = 0.5f;
 }
 
 // Called when the game starts or when spawned
@@ -119,4 +129,26 @@ void ASTrackerBot::SelfDestruction()
 	UGameplayStatics::SpawnEmitterAtLocation(this, ExplodeEffect, GetActorLocation());
 
 	Destroy();
+}
+
+void  ASTrackerBot::ApplySelfDamage()
+{
+	UGameplayStatics::ApplyDamage(this, SelfKillDamage, GetController(), this, nullptr);
+}
+
+void ASTrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	ASCharacter* PlayerPawn = Cast<ASCharacter>(OtherActor);
+	// 不是玩家则返回
+	if (!PlayerPawn)
+	{
+		return;
+	}
+	if (bKillingSelf)
+	{
+		return;
+	}
+	bKillingSelf = true;
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandler, this, &ASTrackerBot::ApplySelfDamage, SelfKillInterval, true);
 }
