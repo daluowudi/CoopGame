@@ -113,7 +113,7 @@ void ASTrackerBot::SelfDestruction()
 	// damage
 	UGameplayStatics::ApplyRadialDamage(this, ExplodeDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoreActors, this);
 	// debug sphere
-	UKismetSystemLibrary::DrawDebugSphere(GetWorld(), GetActorLocation(), ExplodeRadius, 8, FColor::Red);
+	UKismetSystemLibrary::DrawDebugSphere(GetWorld(), GetActorLocation(), ExplodeRadius, 8, FColor::Red, 5.0f);
 
 	// effect
 	UGameplayStatics::SpawnEmitterAtLocation(this, ExplodeEffect, GetActorLocation());
