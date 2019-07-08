@@ -26,7 +26,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USHealthComponent* HealthComp;
 
-	UPROPERTY(VisibleAnywhere, Category = "Explode")
+	UPROPERTY(EditDefaultsOnly, Category = "Explode")
 	UParticleSystem* ExplodeEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Explode")
