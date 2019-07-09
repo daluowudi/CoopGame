@@ -52,7 +52,10 @@ void ASTrackerBot::BeginPlay()
 		HealthComp->OnHealthChanged.AddDynamic(this, &ASTrackerBot::OnTakeDamage);
 	}
 	
-	NextPathPoint = GetNextPathPoint();
+	if (HasAuthority())
+	{
+		NextPathPoint = GetNextPathPoint();
+	}
 }
 
 FVector ASTrackerBot::GetNextPathPoint()
@@ -74,19 +77,21 @@ void ASTrackerBot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 
-	float Distance = (NextPathPoint - GetActorLocation()).Size();
-
-	if (Distance <= TriggerDistance)
+	if (HasAuthority() && !bExplode)
 	{
-		NextPathPoint = GetNextPathPoint();
-	}else
-	{
-		FVector ForceDirection = NextPathPoint - GetActorLocation();
+		float Distance = (NextPathPoint - GetActorLocation()).Size();
 
-		ForceDirection *= ForceRate;
+		if (Distance <= TriggerDistance)
+		{
+			NextPathPoint = GetNextPathPoint();
+		}else
+		{
+			FVector ForceDirection = NextPathPoint - GetActorLocation();
 
-		MeshComp->AddForce(ForceDirection, NAME_None, bUseVelocityChange);
+			ForceDirection *= ForceRate;
+
+			MeshComp->AddForce(ForceDirection, NAME_None, bUseVelocityChange);
+		}	
 	}
 }
 
@@ -117,26 +122,32 @@ void ASTrackerBot::SelfDestruction()
 	}
 
 	bExplode = true;
-
-	TArray<AActor*> IgnoreActors;
-	IgnoreActors.Add(this);
-
-	// damage
-	UGameplayStatics::ApplyRadialDamage(this, ExplodeDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoreActors, this);
-	// debug sphere
-	UKismetSystemLibrary::DrawDebugSphere(GetWorld(), GetActorLocation(), ExplodeRadius, 8, FColor::Red, 5.0f);
-
 	// effect
 	UGameplayStatics::SpawnEmitterAtLocation(this, ExplodeEffect, GetActorLocation());
 
 	UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation(), FRotator::ZeroRotator);
 
-	Destroy();
+	if (HasAuthority())
+	{
+		TArray<AActor*> IgnoreActors;
+		IgnoreActors.Add(this);
+
+		// damage
+		UGameplayStatics::ApplyRadialDamage(this, ExplodeDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoreActors, this);
+		// debug sphere
+		UKismetSystemLibrary::DrawDebugSphere(GetWorld(), GetActorLocation(), ExplodeRadius, 8, FColor::Red, 5.0f);
+
+
+		SetLifeSpan(2.0f);
+	}	
 }
 
 void  ASTrackerBot::ApplySelfDamage()
 {
-	UGameplayStatics::ApplyDamage(this, SelfKillDamage, GetController(), this, nullptr);
+	if (!bExplode)
+	{
+		UGameplayStatics::ApplyDamage(this, SelfKillDamage, GetController(), this, nullptr);
+	}
 }
 
 void ASTrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
@@ -153,7 +164,10 @@ void ASTrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
 	}
 	bKillingSelf = true;
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandler, this, &ASTrackerBot::ApplySelfDamage, SelfKillInterval, true);
+	if (HasAuthority() && !bExplode)
+	{
+		GetWorld()->GetTimerManager().SetTimer(TimerHandler, this, &ASTrackerBot::ApplySelfDamage, SelfKillInterval, true);
+	}
 
 	UGameplayStatics::SpawnSoundAttached(WarningSound, RootComponent);
 }
