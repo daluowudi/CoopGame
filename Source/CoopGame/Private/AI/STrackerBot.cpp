@@ -127,6 +127,9 @@ void ASTrackerBot::SelfDestruction()
 
 	UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation(), FRotator::ZeroRotator);
 
+	MeshComp->SetVisibility(false, false);
+	// MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
 	if (HasAuthority())
 	{
 		TArray<AActor*> IgnoreActors;
@@ -137,8 +140,6 @@ void ASTrackerBot::SelfDestruction()
 		// debug sphere
 		UKismetSystemLibrary::DrawDebugSphere(GetWorld(), GetActorLocation(), ExplodeRadius, 8, FColor::Red, 5.0f);
 
-		MeshComp->SetVisibility(false, false);
-		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 		SetLifeSpan(2.0f);
 	}	
