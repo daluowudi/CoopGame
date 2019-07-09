@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "SHealthComponent.h"
 #include "SCharacter.h"
+#include "Sound/SoundCue.h"
 
 
 // Sets default values
@@ -128,6 +129,8 @@ void ASTrackerBot::SelfDestruction()
 	// effect
 	UGameplayStatics::SpawnEmitterAtLocation(this, ExplodeEffect, GetActorLocation());
 
+	UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation(), FRotator::ZeroRotator);
+
 	Destroy();
 }
 
@@ -151,4 +154,6 @@ void ASTrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
 	bKillingSelf = true;
 
 	GetWorld()->GetTimerManager().SetTimer(TimerHandler, this, &ASTrackerBot::ApplySelfDamage, SelfKillInterval, true);
+
+	UGameplayStatics::SpawnSoundAttached(WarningSound, RootComponent);
 }

@@ -11,6 +11,7 @@ class USHealthComponent;
 class UMaterialInstanceDynamic;
 class UParticleSystem;
 class USphereComponent;
+class USoundCue;
 
 UCLASS()
 class COOPGAME_API ASTrackerBot : public APawn
@@ -44,6 +45,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Explode")
 	float SelfKillInterval;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	USoundCue* ExplodeSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	USoundCue* WarningSound;
 
 	UMaterialInstanceDynamic* MaterialInst;
 
