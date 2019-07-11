@@ -129,7 +129,7 @@ void ASTrackerBot::SelfDestruction()
 
 	MeshComp->SetVisibility(false, false);
 	// MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	
+
 	if (HasAuthority())
 	{
 		TArray<AActor*> IgnoreActors;
@@ -155,6 +155,8 @@ void  ASTrackerBot::ApplySelfDamage()
 
 void ASTrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
 {
+	Super::NotifyActorBeginOverlap(OtherActor);
+	
 	ASCharacter* PlayerPawn = Cast<ASCharacter>(OtherActor);
 	// 不是玩家则返回
 	if (!PlayerPawn)
