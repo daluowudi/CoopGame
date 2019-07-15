@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "SPowerupActor.generated.h"
 
+class UStaticMeshComponent;
+
 UCLASS()
 class COOPGAME_API ASPowerupActor : public AActor
 {
@@ -15,12 +17,34 @@ public:
 	// Sets default values for this actor's properties
 	ASPowerupActor();
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components")
+	UStaticMeshComponent* MeshComp;
+
+	bool bIsActivated;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Powerup")
+	float PowerupTickInterval;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Powerup")
+	int32 PowerupTickTimes;
+
+	int32 CurrentTickTimes;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	FTimerHandle TimerHandler;
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	void DoActivate(AActor* ActivateFor);
 
+	void OnTickPowerup();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "PowerupFunction")
+	void OnActivated();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "PowerupFunction")
+	void OnExpired();
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "PowerupFunction")
+	void OnPowerupTicked();	
 };
