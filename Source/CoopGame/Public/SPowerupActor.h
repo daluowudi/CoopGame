@@ -47,11 +47,11 @@ public:
 	void OnTickPowerup();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "PowerupFunction")
-	void OnActivated(APawn* PlayerPawn);
+	void OnActivated();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "PowerupFunction")
-	void OnExpired(APawn* PlayerPawn);
+	void OnExpired();
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "PowerupFunction")
-	void OnPowerupTicked(APawn* PlayerPawn);	
+	void OnPowerupTicked();	
 };

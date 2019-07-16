@@ -55,22 +55,23 @@ void ASPowerupActor::DoActivate(AActor* ActivateFor)
 	// 隐藏自身
 	MeshComp->SetVisibility(false, false);
 
-	OnActivated(TargetPawn);
+	OnActivated();
 }
 
 void ASPowerupActor::OnTickPowerup()
 {
 	CurrentTickTimes++;
 
-	OnPowerupTicked(TargetPawn);
+	OnPowerupTicked();
 
 	if (CurrentTickTimes >= PowerupTickTimes)
 	{
 		GetWorldTimerManager().ClearTimer(TimerHandler);
 
-		OnExpired(TargetPawn);
+		OnExpired();
 
 		bIsActivated = false;
+		TargetPawn = nullptr;
 
 		SetLifeSpan(1.0f);
 	}
