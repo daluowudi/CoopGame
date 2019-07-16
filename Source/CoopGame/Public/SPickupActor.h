@@ -33,6 +33,7 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Powerup")	
 	float CoolDownDuration;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Powerup")	
 	float PowerupActorHeight;
 
 	FTimerHandle TimerHandler;
