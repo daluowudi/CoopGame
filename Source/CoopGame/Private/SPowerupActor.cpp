@@ -34,6 +34,13 @@ void ASPowerupActor::DoActivate(AActor* ActivateFor)
 		return;
 	}
 
+	TargetPawn = Cast<APawn>(ActivateFor);
+	// 不是pawn不激活
+	if (!TargetPawn)
+	{
+		return;
+	}
+
 	bIsActivated = true;
 
 	if (PowerupTickInterval > 0.0f)
@@ -48,20 +55,20 @@ void ASPowerupActor::DoActivate(AActor* ActivateFor)
 	// 隐藏自身
 	MeshComp->SetVisibility(false, false);
 
-	OnActivated();
+	OnActivated(TargetPawn);
 }
 
 void ASPowerupActor::OnTickPowerup()
 {
 	CurrentTickTimes++;
 
-	OnPowerupTicked();
+	OnPowerupTicked(TargetPawn);
 
 	if (CurrentTickTimes >= PowerupTickTimes)
 	{
 		GetWorldTimerManager().ClearTimer(TimerHandler);
 
-		OnExpired();
+		OnExpired(TargetPawn);
 
 		bIsActivated = false;
 

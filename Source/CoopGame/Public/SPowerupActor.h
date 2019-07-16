@@ -33,6 +33,9 @@ public:
 	int32 PowerupTickTimes;
 
 	int32 CurrentTickTimes;
+
+	UPROPERTY(BlueprintReadOnly)
+	APawn* TargetPawn;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -44,11 +47,11 @@ public:
 	void OnTickPowerup();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "PowerupFunction")
-	void OnActivated();
+	void OnActivated(APawn* PlayerPawn);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "PowerupFunction")
-	void OnExpired();
+	void OnExpired(APawn* PlayerPawn);
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "PowerupFunction")
-	void OnPowerupTicked();	
+	void OnPowerupTicked(APawn* PlayerPawn);	
 };
