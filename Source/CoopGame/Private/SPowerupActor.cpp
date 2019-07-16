@@ -7,6 +7,7 @@
 ASPowerupActor::ASPowerupActor()
 {
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	RootComponent = MeshComp;
 
 	bIsActivated = false;
