@@ -33,11 +33,14 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Powerup")	
 	float CoolDownDuration;
 
+	float PowerupActorHeight;
+
 	FTimerHandle TimerHandler;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void PawnPowerupActor();
 public:	
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 

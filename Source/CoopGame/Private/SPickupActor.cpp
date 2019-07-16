@@ -22,12 +22,15 @@ ASPickupActor::ASPickupActor()
 	DecalComp->SetupAttachment(OverlapComp);
 
 	CoolDownDuration = 5.0f;
+	PowerupActorHeight = 0.0f;
 }
 
 // Called when the game starts or when spawned
 void ASPickupActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	PawnPowerupActor();
 }
 
 void ASPickupActor::NotifyActorBeginOverlap(AActor* OtherActor)
@@ -47,5 +50,27 @@ void ASPickupActor::NotifyActorBeginOverlap(AActor* OtherActor)
 
 void ASPickupActor::OnCoolDown()
 {
-	
+	// 已有则不再产生
+	if (PowerupInstance)
+	{
+		return;
+	}
+
+	PawnPowerupActor();
+}
+
+void ASPickupActor::PawnPowerupActor()
+{
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	FVector location = GetActorLocation();
+	location.Z += PowerupActorHeight;
+
+	PowerupInstance = GetWorld()->SpawnActor<ASPowerupActor>(*PowerupClass, location, FRotator::ZeroRotator);
+
+	if (!PowerupInstance)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ASPickupActor::PawnPowerupActor fail to pawn actor"));
+	}
 }

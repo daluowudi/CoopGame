@@ -40,6 +40,9 @@ void ASPowerupActor::DoActivate(AActor* ActivateFor)
 		OnTickPowerup();
 	}
 
+	// 隐藏自身
+	MeshComp->SetVisibility(false, false);
+
 	OnActivated();
 }
 
