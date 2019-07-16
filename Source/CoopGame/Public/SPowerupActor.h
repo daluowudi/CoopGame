@@ -7,6 +7,7 @@
 #include "SPowerupActor.generated.h"
 
 class UStaticMeshComponent;
+class URotatingMovementComponent;
 
 UCLASS()
 class COOPGAME_API ASPowerupActor : public AActor
@@ -19,6 +20,9 @@ public:
 
 	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category="Components")
 	UStaticMeshComponent* MeshComp;
+
+	// UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category="Components")
+	URotatingMovementComponent* RotatingComp;
 
 	bool bIsActivated;
 

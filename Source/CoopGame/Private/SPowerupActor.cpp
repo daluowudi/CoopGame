@@ -2,6 +2,7 @@
 
 #include "SPowerupActor.h"
 #include "Components/StaticMeshComponent.h"
+#include "GameFramework/RotatingMovementComponent.h"
 
 // Sets default values
 ASPowerupActor::ASPowerupActor()
@@ -9,6 +10,9 @@ ASPowerupActor::ASPowerupActor()
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	RootComponent = MeshComp;
+
+	RotatingComp = CreateDefaultSubobject<URotatingMovementComponent>(TEXT("RotatingComp"));
+	RotatingComp->UpdatedComponent = RootComponent;
 
 	bIsActivated = false;
 
