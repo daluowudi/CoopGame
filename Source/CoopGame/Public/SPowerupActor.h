@@ -17,15 +17,15 @@ public:
 	// Sets default values for this actor's properties
 	ASPowerupActor();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category="Components")
 	UStaticMeshComponent* MeshComp;
 
 	bool bIsActivated;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Powerup")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Powerup")
 	float PowerupTickInterval;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Powerup")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Powerup")
 	int32 PowerupTickTimes;
 
 	int32 CurrentTickTimes;
