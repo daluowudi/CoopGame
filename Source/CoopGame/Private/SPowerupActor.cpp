@@ -53,7 +53,7 @@ void ASPowerupActor::DoActivate(AActor* ActivateFor)
 	}
 
 	// 隐藏自身
-	MeshComp->SetVisibility(false, false);
+	MeshComp->SetVisibility(false, true);
 
 	OnActivated();
 }
