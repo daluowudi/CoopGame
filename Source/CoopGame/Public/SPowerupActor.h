@@ -24,6 +24,7 @@ public:
 	// UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category="Components")
 	URotatingMovementComponent* RotatingComp;
 
+	UPROPERTY(ReplicatedUsing=OnRep_Activate)
 	bool bIsActivated;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Powerup")
@@ -54,4 +55,7 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "PowerupFunction")
 	void OnPowerupTicked();	
+
+	UFUNCTION()
+	void OnRep_Activate();
 };
