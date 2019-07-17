@@ -17,8 +17,6 @@ public:
 	// Sets default values for this component's properties
 	USHealthComponent();
 
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnHealthChangedSignature OnHealthChanged;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player")
 	float DefaultHealth;
@@ -39,4 +37,7 @@ public:
 	// virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;		
 	UFUNCTION(BlueprintCallable)
 	void OnHeal(AActor* HealActor, float DeltaHealth);
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnHealthChangedSignature OnHealthChanged;
 };
