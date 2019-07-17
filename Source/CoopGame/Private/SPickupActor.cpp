@@ -23,6 +23,8 @@ ASPickupActor::ASPickupActor()
 
 	CoolDownDuration = 5.0f;
 	PowerupActorHeight = 0.0f;
+
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -38,6 +40,11 @@ void ASPickupActor::NotifyActorBeginOverlap(AActor* OtherActor)
 	Super::NotifyActorBeginOverlap(OtherActor);
 
 	if (!PowerupInstance)
+	{
+		return;
+	}
+
+	if (!HasAuthority())
 	{
 		return;
 	}
@@ -61,6 +68,11 @@ void ASPickupActor::OnCoolDown()
 
 void ASPickupActor::PawnPowerupActor()
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 

@@ -18,6 +18,8 @@ ASPowerupActor::ASPowerupActor()
 
 	PowerupTickInterval = 0.0f;
 	PowerupTickTimes = 0;
+
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
