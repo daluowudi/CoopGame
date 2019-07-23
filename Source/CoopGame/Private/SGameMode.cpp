@@ -88,9 +88,35 @@ void ASGameMode::CheckWaveState()
 	}
 }
 
+void ASGameMode::CheckAnyPlayerAlive()
+{
+	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		APlayerController* PC = Iterator->Get();
+		if (IsValid(PC) && IsValid(PC->GetPawn()))
+		{
+			APawn* Pawn = PC->GetPawn();
+			USHealthComponent* HealthComponent = Cast<USHealthComponent>(Pawn->GetComponentByClass(USHealthComponent::StaticClass()));
+
+			if (HealthComponent && HealthComponent->GetHealth() > 0.0f)
+			{
+				return;
+			}
+		}
+	}
+
+	GameOver();
+}
+
+void ASGameMode::GameOver()
+{
+	EndWave();
+}
+
 void ASGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	CheckWaveState();
+	CheckAnyPlayerAlive();
 }

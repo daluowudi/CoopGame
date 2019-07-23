@@ -42,4 +42,8 @@ protected:
 	void SpawnBotTick();
 
 	void CheckWaveState();
+
+	void CheckAnyPlayerAlive();
+
+	void GameOver();
 };
