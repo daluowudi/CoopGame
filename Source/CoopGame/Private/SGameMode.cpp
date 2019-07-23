@@ -3,6 +3,7 @@
 #include "SGameMode.h"
 #include "TimerManager.h"
 #include "SHealthComponent.h"
+#include "SGameState.h"
 
 
 ASGameMode::ASGameMode()
@@ -27,6 +28,8 @@ void ASGameMode::StartWave()
 	NumOfBotsToSpawn = CurrentWave * 2;
 
 	GetWorldTimerManager().SetTimer(TimerHandle_BotSpawn, this, &ASGameMode::SpawnBotTick, 1.0f, true, 0.0f);
+
+	SetWaveState(EWaveState::WaveInProgress);
 }
 
 void ASGameMode::EndWave()
@@ -34,12 +37,15 @@ void ASGameMode::EndWave()
 	GetWorldTimerManager().ClearTimer(TimerHandle_BotSpawn);
 	TimerHandle_BotSpawn.Invalidate();
 
+	SetWaveState(EWaveState::WaitingToComplete);
 	// PrepareForNextWave();
 }
 
 void ASGameMode::PrepareForNextWave()
 {
 	GetWorldTimerManager().SetTimer(TimerHandle_WaveHandle, this, &ASGameMode::StartWave, TimeBetWeenWaves, false);
+
+	SetWaveState(EWaveState::WaitingToStart);
 }
 
 void ASGameMode::SpawnBotTick()
@@ -84,6 +90,8 @@ void ASGameMode::CheckWaveState()
 
 	if (bBotAllKilled)
 	{
+		SetWaveState(EWaveState::WaveComplete);
+		
 		PrepareForNextWave();
 	}
 }
@@ -111,6 +119,17 @@ void ASGameMode::CheckAnyPlayerAlive()
 void ASGameMode::GameOver()
 {
 	EndWave();
+
+	SetWaveState(EWaveState::GameOver);
+}
+
+void ASGameMode::SetWaveState(EWaveState NewState)
+{
+	ASGameState* GS = GetGameState<ASGameState>();
+	if (ensureAlways(GS))
+	{
+		GS->SetWaveState(NewState);
+	}
 }
 
 void ASGameMode::Tick(float DeltaTime)
