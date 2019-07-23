@@ -77,3 +77,8 @@ void USHealthComponent::GetLifetimeReplicatedProps( TArray< class FLifetimePrope
 	
 	DOREPLIFETIME(USHealthComponent, Health);
 }
+
+float USHealthComponent::GetHealth() const
+{
+	return Health;
+}

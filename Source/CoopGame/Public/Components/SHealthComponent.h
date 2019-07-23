@@ -17,6 +17,7 @@ public:
 	// Sets default values for this component's properties
 	USHealthComponent();
 
+	float GetHealth() const;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player")
 	float DefaultHealth;

@@ -16,9 +16,12 @@ class COOPGAME_API ASGameMode : public AGameModeBase
 public:
 	ASGameMode();
 
-	void StartPlay() override;
+	virtual void StartPlay() override;
+
+	virtual void Tick(float DeltaTime) override;
 protected:
 	FTimerHandle TimerHandle_BotSpawn;
+	FTimerHandle TimerHandle_WaveHandle;
 
 	int32 NumOfBotsToSpawn;
 
@@ -37,4 +40,6 @@ protected:
 	void PrepareForNextWave();
 
 	void SpawnBotTick();
+
+	void CheckWaveState();
 };
