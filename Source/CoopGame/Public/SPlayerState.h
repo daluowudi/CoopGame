@@ -14,6 +14,16 @@ class COOPGAME_API ASPlayerState : public APlayerState
 {
 	GENERATED_BODY()
 public:
-	UFUNCTION(BlueprintCallable, Category="Score")
+	ASPlayerState();
+	
+	// UFUNCTION(BlueprintCallable, Category="Score")
 	void AddScore(float DeltaScore);
+
+	UPROPERTY(EditDefaultsOnly, Category="Score")
+	float KillScore;
+protected:
+	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void OnActorKilled(AActor* DeadActor, AActor* DamageCauser, class AController* InstigatedBy);
 };

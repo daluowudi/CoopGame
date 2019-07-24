@@ -56,7 +56,6 @@ void USHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, cons
 
 	if (bIsDead)
 	{
-		// OnActorKilled
 		ASGameMode* GS = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
 		
 		if (GS)
