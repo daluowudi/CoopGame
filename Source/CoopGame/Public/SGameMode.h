@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "SGameMode.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActorKilledSignature, AActor*, DeadActor, AActor*, DamageCauser, class AController*, InstigatedBy);
+
 enum class EWaveState : uint8;
 
 /**
@@ -16,7 +18,8 @@ class COOPGAME_API ASGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 public:
-	
+	UPROPERTY(BlueprintAssignable, Category="Events")
+	FOnActorKilledSignature OnActorKilled;
 public:
 	ASGameMode();
 

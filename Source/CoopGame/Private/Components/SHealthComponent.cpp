@@ -2,6 +2,7 @@
 
 #include "SHealthComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "SGameMode.h"
 
 // Sets default values for this component's properties
 USHealthComponent::USHealthComponent()
@@ -9,6 +10,8 @@ USHealthComponent::USHealthComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	// PrimaryComponentTick.bCanEverTick = true;
+
+	bIsDead = false;
 
 	DefaultHealth = 100.0f;
 	SetIsReplicated(true);
@@ -37,10 +40,30 @@ void USHealthComponent::BeginPlay()
 
 void USHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
+	if (Damage <= 0.0f || bIsDead)
+	{
+		return;
+	}
+
 	Health = FMath::Clamp(Health - Damage, 0.0f, DefaultHealth);
 
 	OnHealthChanged.Broadcast(this, Health, Damage, DamageType, InstigatedBy, DamageCauser);
 
+	if (Health <= 0.0f)
+	{
+        bIsDead = true;
+	}
+
+	if (bIsDead)
+	{
+		// OnActorKilled
+		ASGameMode* GS = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
+		
+		if (GS)
+		{
+			GS->OnActorKilled.Broadcast(GetOwner(),DamagedActor, InstigatedBy);
+		}
+	}
 	// UE_LOG(LogTemp, Log, TEXT("Now Health: %f"), Health);
 }
 
