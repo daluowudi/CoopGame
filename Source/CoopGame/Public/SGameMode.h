@@ -16,11 +16,15 @@ class COOPGAME_API ASGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 public:
+	
+public:
 	ASGameMode();
 
 	virtual void StartPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
+
+	// virtual void RestartPlayer(AController* NewPlayer) override;
 protected:
 	FTimerHandle TimerHandle_BotSpawn;
 	FTimerHandle TimerHandle_WaveHandle;

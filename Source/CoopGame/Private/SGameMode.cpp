@@ -19,7 +19,10 @@ void ASGameMode::StartPlay()
 {
 	Super::StartPlay();
 
-	StartWave();
+	// UE_LOG(LogTemp, Log, TEXT("StartPlay ------------------"));
+
+	// StartWave();
+	PrepareForNextWave();
 }
 
 void ASGameMode::StartWave()
@@ -112,6 +115,8 @@ void ASGameMode::CheckAnyPlayerAlive()
 			}
 		}
 	}
+	
+	// UE_LOG(LogTemp, Log, TEXT("CheckGameOver ------------------"));
 
 	GameOver();
 }
