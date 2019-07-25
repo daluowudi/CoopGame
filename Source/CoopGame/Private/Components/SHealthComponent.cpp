@@ -47,8 +47,6 @@ void USHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, cons
 
 	Health = FMath::Clamp(Health - Damage, 0.0f, DefaultHealth);
 
-	OnHealthChanged.Broadcast(this, Health, Damage, DamageType, InstigatedBy, DamageCauser);
-
 	if (Health <= 0.0f)
 	{
         bIsDead = true;
@@ -63,6 +61,9 @@ void USHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, cons
 			GS->OnActorKilled.Broadcast(GetOwner(),DamagedActor, InstigatedBy);
 		}
 	}
+
+	// 现在的写法需要放在上面的消息之后，因为在计分时会判断是否为playercontrolled，而在这个广播中会unpossess
+	OnHealthChanged.Broadcast(this, Health, Damage, DamageType, InstigatedBy, DamageCauser);
 	// UE_LOG(LogTemp, Log, TEXT("Now Health: %f"), Health);
 }
 
