@@ -53,6 +53,9 @@ void ASGameMode::PrepareForNextWave()
 	GetWorldTimerManager().SetTimer(TimerHandle_WaveHandle, this, &ASGameMode::StartWave, TimeBetWeenWaves, false);
 
 	SetWaveState(EWaveState::WaitingToStart);
+
+	// 暂时在这里做复活操作
+	RestartDeadPlayers();
 }
 
 void ASGameMode::SpawnBotTick()
@@ -123,6 +126,19 @@ void ASGameMode::CheckAnyPlayerAlive()
 	// UE_LOG(LogTemp, Log, TEXT("CheckGameOver ------------------"));
 
 	GameOver();
+}
+
+void ASGameMode::RestartDeadPlayers()
+{
+	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		APlayerController* PC = Iterator->Get();
+		if (IsValid(PC) && !IsValid(PC->GetPawn()))
+		{
+			RestartPlayer(PC);
+		}
+	}
+
 }
 
 void ASGameMode::GameOver()
