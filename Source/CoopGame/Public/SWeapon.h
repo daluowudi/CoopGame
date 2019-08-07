@@ -74,6 +74,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon", meta = (ClampMin = 1, ClampMax = 9999))
 	float ShootRate;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon", meta = (ClampMin = 0, ClampMax = 60))
+	float SpreadConeDegrees;
+
 	float TimeBetweenShoot;
 
 	float LastShootTime;

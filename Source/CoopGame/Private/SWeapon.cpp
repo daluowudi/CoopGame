@@ -33,6 +33,7 @@ ASWeapon::ASWeapon()
 	HeadShootRatio = 3.0f;
 
 	ShootRate = 120.0f;
+	SpreadConeDegrees = 0.0f;
 
 	NetUpdateFrequency = 66.0f;
 	MinNetUpdateFrequency = 30.0f;
@@ -74,6 +75,11 @@ void ASWeapon::Fire()
 		MyOwner->GetActorEyesViewPoint(StartPoint, Rotation);
 		
 		FVector ShootDirection = Rotation.Vector();
+
+		float RandRadians = FMath::DegreesToRadians(SpreadConeDegrees);
+
+		ShootDirection = FMath::VRandCone(ShootDirection, RandRadians);
+
 		FVector EndPoint = StartPoint + ShootDirection * 10000.0;
 
 		FVector TraceEnd = EndPoint;
