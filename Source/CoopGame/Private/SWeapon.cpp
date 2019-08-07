@@ -76,7 +76,7 @@ void ASWeapon::Fire()
 		
 		FVector ShootDirection = Rotation.Vector();
 
-		float RandRadians = FMath::DegreesToRadians(SpreadConeDegrees);
+		float RandRadians = FMath::DegreesToRadians(SpreadConeDegrees/2);
 
 		ShootDirection = FMath::VRandCone(ShootDirection, RandRadians);
 
