@@ -32,10 +32,6 @@ protected:
 
 	void EndCrouch();
 
-	void StartFire();
-
-	void StopFire();
-
 	void DoZoom();
 
 	void UnZoom();
@@ -80,4 +76,10 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual FVector GetPawnViewLocation() const override;
+
+	UFUNCTION(BlueprintCallable, Category="Weapon")
+	void StartFire();
+
+	UFUNCTION(BlueprintCallable, Category="Weapon")
+	void StopFire();
 };
