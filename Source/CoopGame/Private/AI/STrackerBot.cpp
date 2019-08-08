@@ -62,13 +62,38 @@ FVector ASTrackerBot::GetNextPathPoint()
 {
 	ACharacter* PlayerPawn = UGameplayStatics::GetPlayerCharacter(this, 0);
 
-	UNavigationPath* NavPath = UNavigationSystemV1::FindPathToActorSynchronously(this, GetActorLocation(), PlayerPawn);
+	APawn* TargetPawn = nullptr;
+	float NearstDistance = 0.0f;
 
-	if (NavPath && NavPath->PathPoints.Num() > 1)
+	for (FConstPawnIterator It = GetWorld()->GetPawnIterator(); It; ++It)
 	{
-		return NavPath->PathPoints[1];
+		APawn* ItPawn = It->Get();
+		if (IsValid(ItPawn) && !USHealthComponent::IsFriendly(ItPawn, this))
+		{
+			USHealthComponent* HealthComponent = Cast<USHealthComponent>(ItPawn->GetComponentByClass(USHealthComponent::StaticClass()));
+
+			if (HealthComponent && HealthComponent->GetHealth() > 0.0f)
+			{
+				float DistanceToTarget = (ItPawn->GetActorLocation() - this->GetActorLocation()).Size();
+				if (!TargetPawn || DistanceToTarget < NearstDistance)
+				{
+					NearstDistance = DistanceToTarget;
+					TargetPawn = ItPawn;
+				}
+			}
+		}
 	}
 
+	if (TargetPawn)
+	{
+		UNavigationPath* NavPath = UNavigationSystemV1::FindPathToActorSynchronously(this, GetActorLocation(), TargetPawn);
+
+		if (NavPath && NavPath->PathPoints.Num() > 1)
+		{
+			return NavPath->PathPoints[1];
+		}
+	}
+	
 	return GetActorLocation();
 }
 
