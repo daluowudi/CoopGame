@@ -43,4 +43,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHealthChangedSignature OnHealthChanged;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	uint8 TeamNum;
+
+	static bool IsFriendly(AActor* ActorA, AActor* ActorB);
 };
