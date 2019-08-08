@@ -188,6 +188,12 @@ void ASTrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
 	{
 		return;
 	}
+
+	if (USHealthComponent::IsFriendly(PlayerPawn, OtherActor))
+	{
+		return;
+	}
+
 	if (bKillingSelf)
 	{
 		return;
