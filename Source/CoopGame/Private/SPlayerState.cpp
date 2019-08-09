@@ -36,5 +36,5 @@ void ASPlayerState::AddScore(float DeltaScore)
 	Score += DeltaScore;
 
 	// UE_Log(LogTemp, Log, TEXT("AddScore"))
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Add Score!"));
+	// GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Add Score!"));
 }
