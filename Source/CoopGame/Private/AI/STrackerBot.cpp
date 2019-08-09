@@ -189,7 +189,7 @@ void ASTrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
 		return;
 	}
 
-	if (USHealthComponent::IsFriendly(PlayerPawn, OtherActor))
+	if (USHealthComponent::IsFriendly(this, OtherActor))
 	{
 		return;
 	}

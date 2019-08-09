@@ -47,5 +47,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	uint8 TeamNum;
 
+	UFUNCTION(BlueprintCallable)
 	static bool IsFriendly(AActor* ActorA, AActor* ActorB);
 };
