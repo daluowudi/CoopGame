@@ -1,63 +1,31 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "SWeapon.h"
+#include "SubmachineGun.h"
 #include "CoopGame.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "Camera/CameraShake.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Net/UnrealNetwork.h"
 
-// static int32 DebugWeaponDrawing = 0;
-// FAutoConsoleVariableRef CVARDebugWeaponDrawing(
-// 	TEXT("COOP.DebugWeapons"),
-// 	DebugWeaponDrawing,
-// 	TEXT("Draw Debug Lines for Weapons"),
-// 	ECVF_Cheat);
-
-// Sets default values
-ASWeapon::ASWeapon()
+static int32 DebugWeaponDrawing = 0;
+FAutoConsoleVariableRef CVARDebugWeaponDrawing(
+	TEXT("COOP.DebugWeapons"),
+	DebugWeaponDrawing,
+	TEXT("Draw Debug Lines for Weapons"),
+	ECVF_Cheat);
+	
+ASubmachineGun::ASubmachineGun()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
-	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComp"));
-	RootComponent = MeshComp;
-
-	MuzzleSocketName = "MuzzleSocket";
 	TraceSocketName = "BeamEnd";
 
-	BaseDamage = 20.0f;
-	HeadShootRatio = 3.0f;
-
-	ShootRate = 120.0f;
 	SpreadConeDegrees = 0.0f;
-
-	NetUpdateFrequency = 66.0f;
-	MinNetUpdateFrequency = 30.0f;
-
-	SetReplicates(true);
 }
 
-void ASWeapon::BeginPlay()
+void ASubmachineGun::Fire()
 {
-    Super::BeginPlay();
+	Super::Fire();
 
-	TimeBetweenShoot = 60 / ShootRate; 
-
-	LastShootTime = -TimeBetweenShoot;
-}
-
-void ASWeapon::Fire()
-{
-	if (!HasAuthority())
-	{
-		ServerFire();
-		// return;
-	}
-	// 对于这种写法始终还是有点想不通，为何不能return呢
 	AActor* MyOwner = GetOwner();
 
 	if (MyOwner)
@@ -73,7 +41,7 @@ void ASWeapon::Fire()
 		QueryParams.bReturnPhysicalMaterial = true;
 
 		MyOwner->GetActorEyesViewPoint(StartPoint, Rotation);
-		
+
 		FVector ShootDirection = Rotation.Vector();
 
 		float RandRadians = FMath::DegreesToRadians(SpreadConeDegrees/2);
@@ -86,6 +54,7 @@ void ASWeapon::Fire()
 
 		EPhysicalSurface HitSurfaceType = SurfaceType_Default;
 		bool bIsHitedSomething = false;
+
 		if (GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_WEAPON, QueryParams))
 		{
             bIsHitedSomething = true;
@@ -110,13 +79,14 @@ void ASWeapon::Fire()
 				PC->ClientPlayCameraShake(CameraShake);
 			}
 		}
-		
-		// if (DebugWeaponDrawing > 0)
-		// {
-		// 	DrawDebugLine(GetWorld(), StartPoint, EndPoint, FColor::White, false, 1, 0, 2);
-		// }
 
-		ApplyEffect(TraceEnd);
+		if (DebugWeaponDrawing > 0)
+		{
+			DrawDebugLine(GetWorld(), StartPoint, EndPoint, FColor::White, false, 1, 0, 2);
+		}
+
+		ApplyMuzzleEffect();
+		ApplyTraceEffect(TraceEnd);
 
 		if (HasAuthority())
 		{
@@ -124,30 +94,11 @@ void ASWeapon::Fire()
 	       	HitScanTrace.SurfaceType = HitSurfaceType;
 	       	HitScanTrace.bHitTarget = bIsHitedSomething;
 		}
-
-		LastShootTime = GetWorld()->TimeSeconds;
 	}
 }
 
-void ASWeapon::StartFire()
+void ASubmachineGun::ApplyTraceEffect(FVector TraceEnd)
 {
-	float FirstDelay = FMath::Max((LastShootTime + TimeBetweenShoot - GetWorld()->TimeSeconds), 0.0f);
-	
-	GetWorldTimerManager().SetTimer(TimerHandle_AutomaticFire, this, &ASWeapon::Fire, TimeBetweenShoot, true, FirstDelay);
-}
-
-void ASWeapon::StopFire()
-{
-	GetWorldTimerManager().ClearTimer(TimerHandle_AutomaticFire);
-}
-
-void ASWeapon::ApplyEffect(FVector TraceEnd)
-{	
-	// 枪口特效
-	if (MuzzleEffect)
-	{
-		UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
-	}
 	// 轨迹特效
 	if (TraceEffect)
 	{
@@ -158,7 +109,7 @@ void ASWeapon::ApplyEffect(FVector TraceEnd)
 	}
 }
 
-void ASWeapon::ApplyImpulseEffect(bool bIsHit, FVector EndPoint, EPhysicalSurface HitSurfaceType)
+void ASubmachineGun::ApplyImpulseEffect(bool bIsHit, FVector EndPoint, EPhysicalSurface HitSurfaceType)
 {
 	/* 
 		不管用，如果加上这层判断的话，server射击时client无法看到受击效果
@@ -189,25 +140,16 @@ void ASWeapon::ApplyImpulseEffect(bool bIsHit, FVector EndPoint, EPhysicalSurfac
 	// }
 }
 
-void ASWeapon::ServerFire_Implementation()
+void ASubmachineGun::OnRep_HitScanTrace()
 {
-	Fire();
-}
-
-bool ASWeapon::ServerFire_Validate()
-{
-	return true;
-}
-
-void ASWeapon::OnRep_HitScanTrace()
-{
-	ApplyEffect(HitScanTrace.TraceTo);
+	ApplyMuzzleEffect();
+	ApplyTraceEffect(HitScanTrace.TraceTo);
 	ApplyImpulseEffect(HitScanTrace.bHitTarget, HitScanTrace.TraceTo, HitScanTrace.SurfaceType);
 }
 
-void ASWeapon::GetLifetimeReplicatedProps( TArray< class FLifetimeProperty > & OutLifetimeProps ) const
+void ASubmachineGun::GetLifetimeReplicatedProps( TArray< class FLifetimeProperty > & OutLifetimeProps ) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
-	DOREPLIFETIME_CONDITION(ASWeapon, HitScanTrace, COND_SkipOwner);
+
+	DOREPLIFETIME_CONDITION(ASubmachineGun, HitScanTrace, COND_SkipOwner);
 }

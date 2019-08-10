@@ -4,7 +4,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
-#include "SWeapon.h"
+#include "SWeaponBase.h"
 #include "CoopGame.h"
 #include "SHealthComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -61,7 +61,7 @@ void ASCharacter::BeginPlay()
 		SpawnParams.Owner = this;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(StaterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+		CurrentWeapon = GetWorld()->SpawnActor<ASWeaponBase>(StaterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
 
 		if (CurrentWeapon)
 		{

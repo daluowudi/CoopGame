@@ -8,7 +8,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
-class ASWeapon;
+class ASWeaponBase;
 class USHealthComponent;
 
 UCLASS()
@@ -55,10 +55,10 @@ protected:
 	float ZoomSpeed;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
-	ASWeapon* CurrentWeapon;
+	ASWeaponBase* CurrentWeapon;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	TSubclassOf<ASWeapon> StaterWeaponClass;
+	TSubclassOf<ASWeaponBase> StaterWeaponClass;
 
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
 	bool bDied;

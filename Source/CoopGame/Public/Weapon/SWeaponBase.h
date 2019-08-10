@@ -4,39 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "SWeapon.generated.h"
+#include "SWeaponBase.generated.h"
 
 class USkeletalMeshComponent;
 class UDamageType;
 class UParticleSystem;
 class UCameraShake;
 
-USTRUCT()
-struct FHitScanTrace
-{
-	GENERATED_BODY()
-public:
-	UPROPERTY()
-	FVector_NetQuantize TraceTo;
-	// 是不是枚举类型的都需要声明为 TEnumAsByte<enumname> 呢
-	UPROPERTY()
-	TEnumAsByte<EPhysicalSurface> SurfaceType;
-
-	UPROPERTY()
-	bool bHitTarget;
-};
-// 废弃废弃废弃废弃废弃废弃废弃废弃废弃废弃
 UCLASS()
-class COOPGAME_API ASWeapon : public AActor
+class COOPGAME_API ASWeaponBase : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ASWeapon();
+	ASWeaponBase();
 
-	virtual void BeginPlay() override;
 protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USkeletalMeshComponent* MeshComp;
 
@@ -58,14 +45,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effect")
 	UParticleSystem* DefaultImpactEffect;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effect")
-	UParticleSystem* TraceEffect;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effect")
 	FName MuzzleSocketName;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effect")
-	FName TraceSocketName;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	TSubclassOf<class UCameraShake> CameraShake;
@@ -74,28 +55,21 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon", meta = (ClampMin = 1, ClampMax = 9999))
 	float ShootRate;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon", meta = (ClampMin = 0, ClampMax = 60))
-	float SpreadConeDegrees;
-
 	float TimeBetweenShoot;
 
 	float LastShootTime;
 
 	FTimerHandle TimerHandle_AutomaticFire;
 
-	UPROPERTY(ReplicatedUsing=OnRep_HitScanTrace)
-	FHitScanTrace HitScanTrace;
+	void ApplyMuzzleEffect();
 
-	UFUNCTION()
-	void OnRep_HitScanTrace();
-
-	void ApplyEffect(FVector EndPoint);
-	void ApplyImpulseEffect(bool bIsHit, FVector EndPoint, EPhysicalSurface HitSurFaceType);
-
-	void Fire();
+	virtual void Fire();
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerFire();
+
+	UFUNCTION()
+	void OnOwnerDestory(AActor* DiedActor);
 public:	
 
 	void StartFire();
