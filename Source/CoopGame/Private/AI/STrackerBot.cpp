@@ -131,7 +131,7 @@ void ASTrackerBot::OnTakeDamage(USHealthComponent* OwningHealthComp, float Healt
 	{
 		MaterialInst->SetScalarParameterValue("LastHittedTime", GetWorld()->GetTimeSeconds());
 	}	
-	UE_LOG(LogTemp, Log, TEXT("Now TrackerBot Health: %f"), Health);	
+	UE_LOG(LogTemp, Log, TEXT("Now TrackerBot Health: %f"), Health);
 
 	if (Health <= 0.0)
 	{
