@@ -22,6 +22,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
 	void OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity);
 protected:
 	UProjectileMovementComponent* MovementComp;
