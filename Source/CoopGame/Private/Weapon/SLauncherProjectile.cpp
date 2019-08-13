@@ -13,6 +13,8 @@ ASLauncherProjectile::ASLauncherProjectile()
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	RootComponent = MeshComp;
 
+	GravityScale = 1.0;
+
 	MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MovementComp"));
 	MovementComp->UpdatedComponent = RootComponent;
 	MovementComp->InitialSpeed = 0.0f;
@@ -20,7 +22,6 @@ ASLauncherProjectile::ASLauncherProjectile()
 	MovementComp->MaxSpeed = 1000.0f;
 	MovementComp->bRotationFollowsVelocity = false;
 	MovementComp->bShouldBounce = true;
-	MovementComp->ProjectileGravityScale = 1.0f;
 	MovementComp->SetActive(false);
 }
 
@@ -31,6 +32,8 @@ void ASLauncherProjectile::BeginPlay()
 	
 	if (MovementComp)
 	{
+		MovementComp->ProjectileGravityScale = GravityScale;
+		
 		MovementComp->OnProjectileBounce.AddDynamic(this, &ASLauncherProjectile::OnProjectileBounce);
 	}
 }

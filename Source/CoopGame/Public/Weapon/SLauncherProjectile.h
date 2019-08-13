@@ -30,6 +30,8 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	UStaticMeshComponent* MeshComp;
 
+	UPROPERTY(EditDefaultsOnly, Category="Projectile", meta=(ClampMin="0", ClampMax="1"))
+	float GravityScale;
 public:	
 	// Called every frame
 	// virtual void Tick(float DeltaTime) override;
