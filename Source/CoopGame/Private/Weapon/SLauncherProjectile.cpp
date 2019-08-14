@@ -32,6 +32,7 @@ ASLauncherProjectile::ASLauncherProjectile()
 	MovementComp->SetActive(false);
 
 	SetReplicates(true);
+	SetReplicateMovement(true);
 }
 
 // Called when the game starts or when spawned
