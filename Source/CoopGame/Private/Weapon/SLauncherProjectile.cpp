@@ -18,6 +18,10 @@ ASLauncherProjectile::ASLauncherProjectile()
 	GravityScale = 1.0;
 	BoomDelay = 1.0;
 
+	ExplodeDamage = 50.0f;
+	ExplodeRadius = 50.0f;
+
+
 	MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MovementComp"));
 	MovementComp->UpdatedComponent = RootComponent;
 	MovementComp->InitialSpeed = 0.0f;
