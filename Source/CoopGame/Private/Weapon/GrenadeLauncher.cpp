@@ -14,7 +14,7 @@ void AGrenadeLauncher::Fire()
 
 	AActor* MyOwner = GetOwner();
 
-	if (MyOwner)
+	if (MyOwner && HasAuthority())
 	{
 		// 产生子弹
 		FActorSpawnParameters SpawnParams;
@@ -33,8 +33,8 @@ void AGrenadeLauncher::Fire()
 		FVector ShootDirection = Rotation.Vector();
 
 		Projectile->Launch(ShootDirection * LaunchVelocity, MyOwner);
-
-		// 特效
-		ApplyMuzzleEffect();
 	}
+
+	// 特效
+	ApplyMuzzleEffect();
 }
