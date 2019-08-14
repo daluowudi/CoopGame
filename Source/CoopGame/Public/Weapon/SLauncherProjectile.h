@@ -51,12 +51,14 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="Projectile")
 	float ExplodeDamage;
+
+	AActor* DamageCauser;
 public:	
 	// Called every frame
 	// virtual void Tick(float DeltaTime) override;
 
 	// 发射!
-	void Launch(FVector Velocity);
+	void Launch(FVector Velocity, AActor* Causer);
 
 	// 爆炸倒计时
 	FTimerHandle BoomTimerHandler;

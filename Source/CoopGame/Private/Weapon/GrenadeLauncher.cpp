@@ -32,7 +32,7 @@ void AGrenadeLauncher::Fire()
 
 		FVector ShootDirection = Rotation.Vector();
 
-		Projectile->Launch(ShootDirection * LaunchVelocity);
+		Projectile->Launch(ShootDirection * LaunchVelocity, MyOwner);
 
 		// 特效
 		ApplyMuzzleEffect();

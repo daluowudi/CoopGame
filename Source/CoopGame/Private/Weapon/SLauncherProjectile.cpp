@@ -47,13 +47,15 @@ void ASLauncherProjectile::BeginPlay()
 	}
 }
 
-void ASLauncherProjectile::Launch(FVector Velocity)
+void ASLauncherProjectile::Launch(FVector Velocity, AActor* Causer)
 {
 	if (MovementComp)
 	{
 		MovementComp->Velocity = Velocity;
 		MovementComp->SetActive(true);
 	}
+
+	DamageCauser = Causer;
 
 	GetWorld()->GetTimerManager().ClearTimer(BoomTimerHandler);
 	GetWorld()->GetTimerManager().SetTimer(BoomTimerHandler, this, &ASLauncherProjectile::onProjectileExplode, BoomDelay, false, -1);
@@ -78,7 +80,7 @@ void ASLauncherProjectile::onProjectileExplode()
 		TArray<AActor*> IgnoreActors;
 		IgnoreActors.Add(this);
 
-		UGameplayStatics::ApplyRadialDamage(this, ExplodeDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoreActors, this);
+		UGameplayStatics::ApplyRadialDamage(DamageCauser, ExplodeDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoreActors, this);
 	}
 }
 // Called every frame
