@@ -27,7 +27,10 @@ protected:
 	UFUNCTION()
 	void OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity);
 
-	void onProjectileExplode();
+	void OnProjectileExplode();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerExplode();
 protected:
 	UProjectileMovementComponent* MovementComp;
 

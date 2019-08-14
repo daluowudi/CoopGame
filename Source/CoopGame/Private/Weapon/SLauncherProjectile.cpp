@@ -58,7 +58,7 @@ void ASLauncherProjectile::Launch(FVector Velocity, AActor* Causer)
 	DamageCauser = Causer;
 
 	GetWorld()->GetTimerManager().ClearTimer(BoomTimerHandler);
-	GetWorld()->GetTimerManager().SetTimer(BoomTimerHandler, this, &ASLauncherProjectile::onProjectileExplode, BoomDelay, false, -1);
+	GetWorld()->GetTimerManager().SetTimer(BoomTimerHandler, this, &ASLauncherProjectile::OnProjectileExplode, BoomDelay, false, -1);
 }
 
 void ASLauncherProjectile::OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity)
@@ -66,14 +66,17 @@ void ASLauncherProjectile::OnProjectileBounce(const FHitResult& ImpactResult, co
 	// UE_LOG(LogTemp, Log, TEXT("Now ASLauncherProjectile Bounces"));
 }
 
-void ASLauncherProjectile::onProjectileExplode()
-{
+void ASLauncherProjectile::OnProjectileExplode()
+{	
+	if (!HasAuthority())
+	{
+		ServerExplode();
+	}
+
 	MeshComp->SetVisibility(false, false);
 
 	UGameplayStatics::SpawnEmitterAtLocation(this, ExplodeEffect, GetActorLocation());
 	UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation(), FRotator::ZeroRotator);
-
-	SetLifeSpan(1.0);
 
 	if (HasAuthority())
 	{
@@ -83,7 +86,19 @@ void ASLauncherProjectile::onProjectileExplode()
 		UGameplayStatics::ApplyRadialDamage(this, ExplodeDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoreActors, DamageCauser, nullptr, true);
 
 		UKismetSystemLibrary::DrawDebugSphere(GetWorld(), GetActorLocation(), ExplodeRadius, 8, FColor::Red, 5.0f);
+
+		SetLifeSpan(1.0);
 	}
+}
+
+void ASLauncherProjectile::ServerExplode_Implementation()
+{
+	OnProjectileExplode();
+}
+
+bool ASLauncherProjectile::ServerExplode_Validate()
+{
+	return true;
 }
 // Called every frame
 // void ASLauncherProjectile::Tick(float DeltaTime)
