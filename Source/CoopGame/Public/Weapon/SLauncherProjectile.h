@@ -8,6 +8,8 @@
 
 class UStaticMeshComponent;
 class UProjectileMovementComponent;
+class UParticleSystem;
+class USoundCue;
 
 UCLASS()
 class COOPGAME_API ASLauncherProjectile : public AActor
@@ -24,18 +26,38 @@ protected:
 
 	UFUNCTION()
 	void OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity);
+
+	void onProjectileExplode();
 protected:
 	UProjectileMovementComponent* MovementComp;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	UStaticMeshComponent* MeshComp;
 
+	UPROPERTY(EditDefaultsOnly, Category="Effect")
+	UParticleSystem* ExplodeEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category="Sound")
+	USoundCue* ExplodeSound;
+
 	UPROPERTY(EditDefaultsOnly, Category="Projectile", meta=(ClampMin="0", ClampMax="1"))
 	float GravityScale;
+
+	UPROPERTY(EditDefaultsOnly, Category="Projectile")
+	float BoomDelay;
+
+	UPROPERTY(EditDefaultsOnly, Category="Projectile")
+	float ExplodeRadius;
+
+	UPROPERTY(EditDefaultsOnly, Category="Projectile")
+	float ExplodeDamage;
 public:	
 	// Called every frame
 	// virtual void Tick(float DeltaTime) override;
 
 	// 发射!
 	void Launch(FVector Velocity);
+
+	// 爆炸倒计时
+	FTimerHandle BoomTimerHandler;
 };

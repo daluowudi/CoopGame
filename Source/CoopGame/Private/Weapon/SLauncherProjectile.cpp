@@ -3,6 +3,8 @@
 #include "SLauncherProjectile.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 ASLauncherProjectile::ASLauncherProjectile()
@@ -14,6 +16,7 @@ ASLauncherProjectile::ASLauncherProjectile()
 	RootComponent = MeshComp;
 
 	GravityScale = 1.0;
+	BoomDelay = 1.0;
 
 	MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MovementComp"));
 	MovementComp->UpdatedComponent = RootComponent;
@@ -23,6 +26,8 @@ ASLauncherProjectile::ASLauncherProjectile()
 	MovementComp->bRotationFollowsVelocity = false;
 	MovementComp->bShouldBounce = true;
 	MovementComp->SetActive(false);
+
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -33,7 +38,7 @@ void ASLauncherProjectile::BeginPlay()
 	if (MovementComp)
 	{
 		MovementComp->ProjectileGravityScale = GravityScale;
-		
+
 		MovementComp->OnProjectileBounce.AddDynamic(this, &ASLauncherProjectile::OnProjectileBounce);
 	}
 }
@@ -45,6 +50,9 @@ void ASLauncherProjectile::Launch(FVector Velocity)
 		MovementComp->Velocity = Velocity;
 		MovementComp->SetActive(true);
 	}
+
+	GetWorld()->GetTimerManager().ClearTimer(BoomTimerHandler);
+	GetWorld()->GetTimerManager().SetTimer(BoomTimerHandler, this, &ASLauncherProjectile::onProjectileExplode, BoomDelay, false, -1);
 }
 
 void ASLauncherProjectile::OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity)
@@ -52,6 +60,23 @@ void ASLauncherProjectile::OnProjectileBounce(const FHitResult& ImpactResult, co
 	UE_LOG(LogTemp, Log, TEXT("Now ASLauncherProjectile Bounces"));
 }
 
+void ASLauncherProjectile::onProjectileExplode()
+{
+	MeshComp->SetVisibility(false, false);
+
+	UGameplayStatics::SpawnEmitterAtLocation(this, ExplodeEffect, GetActorLocation());
+	UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation(), FRotator::ZeroRotator);
+
+	SetLifeSpan(1.0);
+
+	if (HasAuthority())
+	{
+		TArray<AActor*> IgnoreActors;
+		IgnoreActors.Add(this);
+
+		UGameplayStatics::ApplyRadialDamage(this, ExplodeDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoreActors, this);
+	}
+}
 // Called every frame
 // void ASLauncherProjectile::Tick(float DeltaTime)
 // {
