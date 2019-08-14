@@ -63,7 +63,7 @@ void ASLauncherProjectile::Launch(FVector Velocity, AActor* Causer)
 
 void ASLauncherProjectile::OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity)
 {
-	UE_LOG(LogTemp, Log, TEXT("Now ASLauncherProjectile Bounces"));
+	// UE_LOG(LogTemp, Log, TEXT("Now ASLauncherProjectile Bounces"));
 }
 
 void ASLauncherProjectile::onProjectileExplode()
@@ -80,7 +80,9 @@ void ASLauncherProjectile::onProjectileExplode()
 		TArray<AActor*> IgnoreActors;
 		IgnoreActors.Add(this);
 
-		UGameplayStatics::ApplyRadialDamage(DamageCauser, ExplodeDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoreActors, this);
+		UGameplayStatics::ApplyRadialDamage(this, ExplodeDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoreActors, DamageCauser, nullptr, true);
+
+		UKismetSystemLibrary::DrawDebugSphere(GetWorld(), GetActorLocation(), ExplodeRadius, 8, FColor::Red, 5.0f);
 	}
 }
 // Called every frame
