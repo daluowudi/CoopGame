@@ -5,6 +5,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ASLauncherProjectile::ASLauncherProjectile()
@@ -69,37 +70,41 @@ void ASLauncherProjectile::OnProjectileBounce(const FHitResult& ImpactResult, co
 
 void ASLauncherProjectile::OnProjectileExplode()
 {	
-	if (!HasAuthority())
+	if (HasAuthority() && !bExplode)
 	{
-		ServerExplode();
-	}
+		DoExplode();
+		SetLifeSpan(1.0);
 
+		bExplode = true;
+	}
+	
+}
+
+void ASLauncherProjectile::DoExplode()
+{
 	MeshComp->SetVisibility(false, false);
 
 	UGameplayStatics::SpawnEmitterAtLocation(this, ExplodeEffect, GetActorLocation());
 	UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation(), FRotator::ZeroRotator);
 
-	if (HasAuthority())
-	{
-		TArray<AActor*> IgnoreActors;
-		IgnoreActors.Add(this);
+	TArray<AActor*> IgnoreActors;
+	IgnoreActors.Add(this);
 
-		UGameplayStatics::ApplyRadialDamage(this, ExplodeDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoreActors, DamageCauser, nullptr, true);
+	UGameplayStatics::ApplyRadialDamage(this, ExplodeDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoreActors, DamageCauser, nullptr, true);
 
-		UKismetSystemLibrary::DrawDebugSphere(GetWorld(), GetActorLocation(), ExplodeRadius, 8, FColor::Red, 5.0f);
-
-		SetLifeSpan(1.0);
-	}
+	UKismetSystemLibrary::DrawDebugSphere(GetWorld(), GetActorLocation(), ExplodeRadius, 8, FColor::Red, 5.0f);
 }
 
-void ASLauncherProjectile::ServerExplode_Implementation()
+void ASLauncherProjectile::OnRep_Explode()
 {
-	OnProjectileExplode();
+	DoExplode();
 }
 
-bool ASLauncherProjectile::ServerExplode_Validate()
+void ASLauncherProjectile::GetLifetimeReplicatedProps( TArray< class FLifetimeProperty > & OutLifetimeProps ) const
 {
-	return true;
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ASLauncherProjectile, bExplode);
 }
 // Called every frame
 // void ASLauncherProjectile::Tick(float DeltaTime)

@@ -28,9 +28,6 @@ protected:
 	void OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity);
 
 	void OnProjectileExplode();
-
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerExplode();
 protected:
 	UProjectileMovementComponent* MovementComp;
 
@@ -56,6 +53,14 @@ protected:
 	float ExplodeDamage;
 
 	AActor* DamageCauser;
+
+	UPROPERTY(Transient, ReplicatedUsing=OnRep_Explode)
+	bool bExplode;
+
+	UFUNCTION()
+	void OnRep_Explode();
+
+	void DoExplode();
 public:	
 	// Called every frame
 	// virtual void Tick(float DeltaTime) override;

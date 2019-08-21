@@ -24,15 +24,18 @@ void AGrenadeLauncher::Fire()
 		FTransform MuzzleTransform = MeshComp->GetSocketTransform(MuzzleSocketName, RTS_World);
 		ASLauncherProjectile* Projectile = GetWorld()->SpawnActor<ASLauncherProjectile>(ProjectileClass, MuzzleTransform.GetLocation(), FRotator::ZeroRotator, SpawnParams);
 
-		// 将子弹发射出去
-		FVector StartPoint;
-		FRotator Rotation;
+		if (Projectile)
+		{
+			// 将子弹发射出去
+			FVector StartPoint;
+			FRotator Rotation;
 
-		MyOwner->GetActorEyesViewPoint(StartPoint, Rotation);
+			MyOwner->GetActorEyesViewPoint(StartPoint, Rotation);
 
-		FVector ShootDirection = Rotation.Vector();
-
-		Projectile->Launch(ShootDirection * LaunchVelocity, MyOwner);
+			FVector ShootDirection = Rotation.Vector();
+			
+			Projectile->Launch(ShootDirection * LaunchVelocity, MyOwner);
+		}
 	}
 
 	// 特效
