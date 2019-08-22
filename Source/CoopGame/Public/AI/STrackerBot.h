@@ -17,7 +17,6 @@ UCLASS()
 class COOPGAME_API ASTrackerBot : public APawn
 {
 	GENERATED_BODY()
-
 public:
 	// Sets default values for this pawn's properties
 	ASTrackerBot();
@@ -31,8 +30,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USphereComponent* OverlapComp;
 
+	// 用于判断附近有己方单位则升级伤害的组件
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	USphereComponent* LevelupOverlapComp;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Explode")
 	UParticleSystem* ExplodeEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Explode")
+	int MaxLevel;
+
+	int OverlapNum;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Explode")
 	float ExplodeDamage;
@@ -42,6 +50,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Explode")
 	float SelfKillDamage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Explode")
+	float ExtraDamageRatio;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Explode")
 	float SelfKillInterval;
@@ -88,4 +99,13 @@ public:
 	void ApplySelfDamage();
 
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
+	UFUNCTION()
+	void OnJudgeLevelupBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnJudgeLevelupEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UFUNCTION(BlueprintCallable, Category="Explode")
+	int GetCurLevel();
 };

@@ -30,6 +30,12 @@ ASTrackerBot::ASTrackerBot()
 	OverlapComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	OverlapComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
+	LevelupOverlapComp = CreateDefaultSubobject<USphereComponent>(TEXT("LevelupOverlapComp"));
+	LevelupOverlapComp->SetupAttachment(RootComponent);
+	LevelupOverlapComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	LevelupOverlapComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+	LevelupOverlapComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
 	HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComp"));
 
 	ForceRate = 1000.0f;
@@ -38,14 +44,25 @@ ASTrackerBot::ASTrackerBot()
 	bExplode = false;
 	ExplodeDamage = 50.0f;
 	ExplodeRadius = 50.0f;
+	ExtraDamageRatio = 20.0f;
 	SelfKillDamage = 20.0f;
 	SelfKillInterval = 0.5f;
+
+	MaxLevel = 5;
+	OverlapNum = 0;
+
 }
 
 // Called when the game starts or when spawned
 void ASTrackerBot::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (LevelupOverlapComp)
+	{
+		LevelupOverlapComp->OnComponentBeginOverlap.AddDynamic(this, &ASTrackerBot::OnJudgeLevelupBeginOverlap);
+		LevelupOverlapComp->OnComponentEndOverlap.AddDynamic(this, &ASTrackerBot::OnJudgeLevelupEndOverlap);
+	}
 
 	if (HealthComp)
 	{
@@ -160,8 +177,9 @@ void ASTrackerBot::SelfDestruction()
 		TArray<AActor*> IgnoreActors;
 		IgnoreActors.Add(this);
 
+		float NowDamage = ExplodeDamage + GetCurLevel() * ExtraDamageRatio;
 		// damage
-		UGameplayStatics::ApplyRadialDamage(this, ExplodeDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoreActors, this);
+		UGameplayStatics::ApplyRadialDamage(this, NowDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoreActors, this);
 		// debug sphere
 		// UKismetSystemLibrary::DrawDebugSphere(GetWorld(), GetActorLocation(), ExplodeRadius, 8, FColor::Red, 5.0f);
 
@@ -206,4 +224,39 @@ void ASTrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
 	}
 
 	UGameplayStatics::SpawnSoundAttached(WarningSound, RootComponent);
+}
+
+// 新重合一个增加一级
+void ASTrackerBot::OnJudgeLevelupBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (Other && OtherComp)
+	{
+		ASTrackerBot* OtherBot = Cast<ASTrackerBot>(Other);
+		if (OtherBot)
+		{
+			OverlapNum++;
+		}
+	}
+}
+
+// 一个退出重合减少一级
+void ASTrackerBot::OnJudgeLevelupEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor && OtherComp)
+	{
+		ASTrackerBot* OtherBot = Cast<ASTrackerBot>(OtherActor);
+		if (OtherBot)
+		{
+			OverlapNum--;
+			if (OverlapNum < 0)
+			{
+				OverlapNum = 0;
+			}
+		}
+	}
+}
+
+int ASTrackerBot::GetCurLevel()
+{
+	return OverlapNum < MaxLevel ? OverlapNum : MaxLevel;
 }
