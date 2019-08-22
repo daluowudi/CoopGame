@@ -137,13 +137,18 @@ void ASTrackerBot::Tick(float DeltaTime)
 	}
 }
 
-void ASTrackerBot::OnTakeDamage(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
+void ASTrackerBot::CheckMaterialInst()
 {
 	if (!MaterialInst)
 	{
 		MaterialInst = MeshComp->CreateAndSetMaterialInstanceDynamicFromMaterial(0, MeshComp->GetMaterial(0));
 	}
-	
+}
+
+void ASTrackerBot::OnTakeDamage(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
+{	
+	CheckMaterialInst();
+
 	if (MaterialInst)
 	{
 		MaterialInst->SetScalarParameterValue("LastHittedTime", GetWorld()->GetTimeSeconds());
@@ -235,6 +240,8 @@ void ASTrackerBot::OnJudgeLevelupBeginOverlap(UPrimitiveComponent* OverlappedCom
 		if (OtherBot)
 		{
 			OverlapNum++;
+
+			OnCurLevelChanged();
 		}
 	}
 }
@@ -252,6 +259,8 @@ void ASTrackerBot::OnJudgeLevelupEndOverlap(UPrimitiveComponent* OverlappedCompo
 			{
 				OverlapNum = 0;
 			}
+
+			OnCurLevelChanged();
 		}
 	}
 }
@@ -259,4 +268,14 @@ void ASTrackerBot::OnJudgeLevelupEndOverlap(UPrimitiveComponent* OverlappedCompo
 int ASTrackerBot::GetCurLevel()
 {
 	return OverlapNum < MaxLevel ? OverlapNum : MaxLevel;
+}
+
+void ASTrackerBot::OnCurLevelChanged()
+{
+	CheckMaterialInst();
+	
+	if (MaterialInst)
+	{
+		MaterialInst->SetScalarParameterValue("PowerLevelAlpha", GetCurLevel() / (float)MaxLevel);
+	}		
 }

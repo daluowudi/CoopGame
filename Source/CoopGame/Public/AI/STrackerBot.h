@@ -108,4 +108,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Explode")
 	int GetCurLevel();
+
+	void CheckMaterialInst();
+	void OnCurLevelChanged();
 };
