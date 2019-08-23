@@ -158,7 +158,7 @@ void ASTrackerBot::OnTakeDamage(USHealthComponent* OwningHealthComp, float Healt
 	{
 		MaterialInst->SetScalarParameterValue("LastHittedTime", GetWorld()->GetTimeSeconds());
 	}	
-	UE_LOG(LogTemp, Log, TEXT("Now TrackerBot Health: %f"), Health);
+	// UE_LOG(LogTemp, Log, TEXT("Now TrackerBot Health: %f"), Health);
 
 	if (Health <= 0.0)
 	{
@@ -270,6 +270,7 @@ void ASTrackerBot::OnJudgeLevelupBeginOverlap(UPrimitiveComponent* OverlappedCom
 {
 	if (Other && OtherComp)
 	{
+		// UE_LOG(LogTemp, Log, TEXT("OnJudgeLevelupBeginOverlap First!!!! (%s)"), *Other->GetName());
 		ASTrackerBot* OtherBot = Cast<ASTrackerBot>(Other);
 		if (OtherBot)
 		{
@@ -310,6 +311,8 @@ void ASTrackerBot::OnCurLevelChanged()
 	
 	if (MaterialInst)
 	{
+		// UE_LOG(LogTemp, Log, TEXT("Now PowerLevelAlpha: %f"), GetCurLevel() / (float)MaxLevel);
+
 		MaterialInst->SetScalarParameterValue("PowerLevelAlpha", GetCurLevel() / (float)MaxLevel);
 	}		
 }
