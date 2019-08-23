@@ -58,6 +58,11 @@ void ASTrackerBot::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (OverlapComp)
+	{
+		OverlapComp->OnComponentBeginOverlap.AddDynamic(this, &ASTrackerBot::OnSelfDestructionBeginOverlap);
+	}
+
 	if (LevelupOverlapComp)
 	{
 		LevelupOverlapComp->OnComponentBeginOverlap.AddDynamic(this, &ASTrackerBot::OnJudgeLevelupBeginOverlap);
@@ -201,6 +206,34 @@ void  ASTrackerBot::ApplySelfDamage()
 	}
 }
 
+void ASTrackerBot::OnSelfDestructionBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ASCharacter* PlayerPawn = Cast<ASCharacter>(Other);
+	// 不是玩家则返回
+	if (!PlayerPawn)
+	{
+		return;
+	}
+
+	if (USHealthComponent::IsFriendly(this, Other))
+	{
+		return;
+	}
+
+	if (bKillingSelf)
+	{
+		return;
+	}
+	bKillingSelf = true;
+
+	if (HasAuthority() && !bExplode)
+	{
+		GetWorld()->GetTimerManager().SetTimer(TimerHandler, this, &ASTrackerBot::ApplySelfDamage, SelfKillInterval, true);
+	}
+
+	UGameplayStatics::SpawnSoundAttached(WarningSound, RootComponent);
+}
+/*
 void ASTrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
@@ -230,6 +263,7 @@ void ASTrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
 
 	UGameplayStatics::SpawnSoundAttached(WarningSound, RootComponent);
 }
+*/
 
 // 新重合一个增加一级
 void ASTrackerBot::OnJudgeLevelupBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
