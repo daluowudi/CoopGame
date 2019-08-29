@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "SHealthComponent.h"
+#include "PhysicsEngine/RadialForceComponent.h"
 
 // Sets default values
 AExplosiveBarrel::AExplosiveBarrel()
@@ -15,12 +16,25 @@ AExplosiveBarrel::AExplosiveBarrel()
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	RootComponent = MeshComp;
 
-	MeshComp->SetCanEverAffectNavigation(false);
+	// MeshComp->SetCanEverAffectNavigation(false);
 	MeshComp->SetSimulatePhysics(true);
+	MeshComp->SetCollisionObjectType(ECC_PhysicsBody);
 
 	HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComp"));
 
+	RadialForceComp = CreateDefaultSubobject<URadialForceComponent>(TEXT("RadialForceComp"));
+	// RadialForceComp->bIgnoreOwningActor = 0;
+	// RadialForceComp->ForceStrength = 1000.0;
+	RadialForceComp->SetupAttachment(MeshComp);
+	RadialForceComp->bIgnoreOwningActor = true;
+	RadialForceComp->bAutoActivate = false;
+	RadialForceComp->ForceStrength = 1000.0f;
+	RadialForceComp->bImpulseVelChange = true;
+
 	bExplode = false;
+
+	ExplodeDamage = 100;
+	ExplodeRadius = 100;
 
 	SetReplicates(true);
 }
@@ -34,7 +48,6 @@ void AExplosiveBarrel::BeginPlay()
 	{
 		HealthComp->OnHealthChanged.AddDynamic(this, &AExplosiveBarrel::OnTakeDamage);
 	}
-
 }
 
 void AExplosiveBarrel::OnTakeDamage(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
@@ -58,7 +71,9 @@ void AExplosiveBarrel::OnExplode()
 
 	UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation(), FRotator::ZeroRotator);
 
-	MeshComp->SetVisibility(false, false);
+	// MeshComp->SetVisibility(false, false);
+
+	RadialForceComp->FireImpulse();
 
 	if (HasAuthority())
 	{

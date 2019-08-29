@@ -10,6 +10,7 @@ class UStaticMeshComponent;
 class USHealthComponent;
 class UParticleSystem;
 class USoundCue;
+class URadialForceComponent;
 
 UCLASS()
 class COOPGAME_API AExplosiveBarrel : public AActor
@@ -33,6 +34,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Explode")
 	float ExplodeRadius;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	URadialForceComponent* RadialForceComp;
 
 	bool bExplode;
 public:	
