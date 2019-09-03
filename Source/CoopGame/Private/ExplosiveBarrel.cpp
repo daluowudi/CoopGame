@@ -6,6 +6,7 @@
 #include "Sound/SoundCue.h"
 #include "SHealthComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
+#include "Materials/MaterialInterface.h"
 
 // Sets default values
 AExplosiveBarrel::AExplosiveBarrel()
@@ -73,6 +74,8 @@ void AExplosiveBarrel::OnExplode()
 
 	// MeshComp->SetVisibility(false, false);
 
+	MeshComp->SetMaterial(0, ExplodedMaterial);
+
 	RadialForceComp->FireImpulse();
 
 	if (HasAuthority())
@@ -85,7 +88,7 @@ void AExplosiveBarrel::OnExplode()
 		// debug sphere
 		// UKismetSystemLibrary::DrawDebugSphere(GetWorld(), GetActorLocation(), ExplodeRadius, 8, FColor::Red, 5.0f);
 
-		SetLifeSpan(2.0f);
+		// SetLifeSpan(2.0f);
 	}	
 }
 // Called every frame

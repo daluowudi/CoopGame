@@ -11,6 +11,7 @@ class USHealthComponent;
 class UParticleSystem;
 class USoundCue;
 class URadialForceComponent;
+class UMaterialInterface;
 
 UCLASS()
 class COOPGAME_API AExplosiveBarrel : public AActor
@@ -37,6 +38,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	URadialForceComponent* RadialForceComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Explode")
+	UMaterialInterface* ExplodedMaterial;
 
 	bool bExplode;
 public:	
