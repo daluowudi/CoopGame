@@ -38,6 +38,7 @@ AExplosiveBarrel::AExplosiveBarrel()
 	ExplodeRadius = 100;
 
 	SetReplicates(true);
+	SetReplicateMovement(true);
 }
 
 // Called when the game starts or when spawned
@@ -75,6 +76,8 @@ void AExplosiveBarrel::OnExplode()
 	// MeshComp->SetVisibility(false, false);
 
 	MeshComp->SetMaterial(0, ExplodedMaterial);
+
+	MeshComp->AddImpulse(FVector::UpVector * 400, NAME_None, true);
 
 	RadialForceComp->FireImpulse();
 
