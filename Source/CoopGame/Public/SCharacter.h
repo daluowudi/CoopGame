@@ -39,6 +39,9 @@ protected:
 	UFUNCTION()
 	void OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
+	UFUNCTION()
+	void OnCharacterDied(class AController* InstigatedBy, AActor* DamageCauser);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	UCameraComponent* CameraComp;
 
@@ -82,4 +85,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void StopFire();
+
+	void RealDied();
 };

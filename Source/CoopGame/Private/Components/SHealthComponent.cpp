@@ -55,24 +55,16 @@ void USHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, cons
 
 	Health = FMath::Clamp(Health - Damage, 0.0f, DefaultHealth);
 
+	// 这里需要注意一个事情，计分时会判断是否为playercontrolled，所以不能在计分前unprocess
+	OnHealthChanged.Broadcast(this, Health, Damage, DamageType, InstigatedBy, DamageCauser);
+	// UE_LOG(LogTemp, Log, TEXT("Now Health: %f"), Health);
+
 	if (Health <= 0.0f)
 	{
         bIsDead = true;
+        
+        FOnCharacterDied.Broadcast(InstigatedBy, DamageCauser);
 	}
-
-	if (bIsDead)
-	{
-		ASGameMode* GS = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
-		
-		if (GS)
-		{
-			GS->OnActorKilled.Broadcast(GetOwner(),DamagedActor, InstigatedBy);
-		}
-	}
-
-	// 现在的写法需要放在上面的消息之后，因为在计分时会判断是否为playercontrolled，而在这个广播中会unpossess
-	OnHealthChanged.Broadcast(this, Health, Damage, DamageType, InstigatedBy, DamageCauser);
-	// UE_LOG(LogTemp, Log, TEXT("Now Health: %f"), Health);
 }
 
 // Called every frame
@@ -87,6 +79,7 @@ void USHealthComponent::OnRep_Health(float OldHealth)
 {
 	float Damage = OldHealth - Health;
 	
+	// UE_LOG(LogTemp, Log, TEXT("client get Health: %f"), Health);
 	OnHealthChanged.Broadcast(this, Health, Damage, nullptr, nullptr, nullptr);
 }
 
