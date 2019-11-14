@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "SWeaponBase.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAmmoChangedSignature, class AActor*, Owner, class ASWeaponBase*, Weapon, int32, AmmoNum);
+
 class USkeletalMeshComponent;
 class UDamageType;
 class UParticleSystem;
@@ -59,6 +61,16 @@ protected:
 
 	float LastShootTime;
 
+	// 最大弹药量
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon", meta = (ClampMin = 1, ClampMax = 500))
+	float AmmoPerClip;
+
+	UPROPERTY(ReplicatedUsing=OnRep_CurrentAmmo, BlueprintReadOnly, Category = "Weapon")
+	int32 CurrentAmmo;
+
+	UFUNCTION()
+	void OnRep_CurrentAmmo();
+
 	FTimerHandle TimerHandle_AutomaticFire;
 
 	void ApplyMuzzleEffect();
@@ -72,6 +84,11 @@ protected:
 	void OnOwnerDestory(AActor* DiedActor);
 public:	
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnAmmoChangedSignature OnAmmoChanged;
+
 	void StartFire();
 	void StopFire();
+
+	int32 GetCurrentAmmo() const {return CurrentAmmo;};
 };

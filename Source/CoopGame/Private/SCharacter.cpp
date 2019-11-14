@@ -10,6 +10,8 @@
 #include "SHealthComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Animation/AnimMontage.h"
+#include "Animation/AnimInstance.h"
 
 // #include "GameFramework/NavMovementComponent.h"
 // #include "AI/Navigation/NavigationTypes.h"
@@ -37,7 +39,8 @@ ASCharacter::ASCharacter()
 	ZoomedFOV = 65;
 	ZoomSpeed = 20;
 
-	bDied = false;
+	IsDied = false;
+    bReloading = false;
 
 	WeaponSocketName = "WeaponSocket";
 
@@ -68,6 +71,8 @@ void ASCharacter::BeginPlay()
 		if (CurrentWeapon)
 		{
 			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
+
+            OnWeaponChanged.Broadcast(this, nullptr, CurrentWeapon);
 		}
 	}
 }
@@ -104,6 +109,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &ASCharacter::DoZoom);
 	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &ASCharacter::UnZoom);
+
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ASCharacter::DoReload);
+	// PlayerInputComponent->BindAction("Reload", IE_Released, this, &ASCharacter::UnZoom);
 }
 
 void ASCharacter::StartFire()
@@ -120,6 +128,61 @@ void ASCharacter::StopFire()
 	{
 		CurrentWeapon->StopFire();
 	}
+}
+
+void ASCharacter::ServerReload_Implementation()
+{
+	DoReload();
+}
+
+bool ASCharacter::ServerReload_Validate()
+{
+	return true;
+}
+
+void ASCharacter::DoReload()
+{
+	// if (bReloading) return;
+
+	if (!HasAuthority())
+	{
+		ServerReload();
+	}
+
+	bReloading = true;
+
+	float duration = PlayAnimMontage(ReloadAnim);
+
+	if (HasAuthority())
+	{
+		FTimerHandle TimerHandle;
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ASCharacter::FinishReload, duration, false);
+	}
+}
+
+void ASCharacter::FinishReload()
+{
+	// if (!bReloading) return;
+
+	StopAnimMontage(ReloadAnim);
+
+	bReloading = false;
+}
+
+void ASCharacter::OnRep_bReloading(bool OldReloading)
+{
+	if (bReloading)
+	{
+		DoReload();
+	}else
+	{
+		FinishReload();
+	}
+}
+
+void ASCharacter::OnRep_CurrentWeapon(ASWeaponBase* OldWeapon)
+{
+	OnWeaponChanged.Broadcast(this, OldWeapon, CurrentWeapon);
 }
 
 void ASCharacter::DoZoom()
@@ -164,9 +227,9 @@ FVector ASCharacter::GetPawnViewLocation() const
 
 void ASCharacter::OnCharacterDied(class AController* InstigatedBy, AActor* DamageCauser)
 {
-	if (bDied) return;
+	if (IsDied) return;
 	
-	bDied = true;
+	IsDied = true;
 
 	// 计分
 	ASGameMode* GS = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
@@ -208,10 +271,32 @@ void ASCharacter::OnHealthChanged(USHealthComponent* OwningHealthComp, float Hea
  //        FOnCharacterDied.Broadcast(InstigatedBy, DamageCauser);
 }
 
+float ASCharacter::PlayAnimMontage(UAnimMontage* AnimMontage, float InPlayRate, FName StartSectionName)
+{
+	USkeletalMeshComponent* UseMesh = GetMesh();
+	if (AnimMontage && UseMesh && UseMesh->AnimScriptInstance)
+	{
+		return UseMesh->AnimScriptInstance->Montage_Play(AnimMontage, InPlayRate);
+	}
+
+	return 0.0f;
+}
+
+void ASCharacter::StopAnimMontage(UAnimMontage* AnimMontage)
+{
+	USkeletalMeshComponent* UseMesh = GetMesh();
+	if (AnimMontage && UseMesh && UseMesh->AnimScriptInstance
+		&& UseMesh->AnimScriptInstance->Montage_IsPlaying(AnimMontage))
+	{
+		UseMesh->AnimScriptInstance->Montage_Stop(AnimMontage->BlendOut.GetBlendTime(), AnimMontage);
+	}
+}
+
 void ASCharacter::GetLifetimeReplicatedProps( TArray< class FLifetimeProperty > & OutLifetimeProps ) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(ASCharacter, CurrentWeapon);
-	DOREPLIFETIME(ASCharacter, bDied);
+	DOREPLIFETIME_CONDITION(ASCharacter, CurrentWeapon, COND_OwnerOnly);
+	DOREPLIFETIME(ASCharacter, IsDied);
+	DOREPLIFETIME_CONDITION(ASCharacter, bReloading, COND_SkipOwner);
 }

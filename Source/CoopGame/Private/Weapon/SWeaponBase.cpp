@@ -29,6 +29,8 @@ ASWeaponBase::ASWeaponBase()
 	NetUpdateFrequency = 66.0f;
 	MinNetUpdateFrequency = 30.0f;
 
+	AmmoPerClip = 30;
+
 	SetReplicates(true);
 }
 
@@ -40,6 +42,8 @@ void ASWeaponBase::BeginPlay()
 	TimeBetweenShoot = 60 / ShootRate; 
 
 	LastShootTime = -TimeBetweenShoot;
+
+	CurrentAmmo = AmmoPerClip;
 
 	if (HasAuthority())
 	{
@@ -61,6 +65,9 @@ void ASWeaponBase::Fire()
 	}
 // 对于这种写法始终还是有点想不通，为何不能return呢，由于拆分出了基类不明显了，不拆分出来的话，下面是开火相关内容
 	LastShootTime = GetWorld()->TimeSeconds;
+	
+	CurrentAmmo--;
+	OnAmmoChanged.Broadcast(GetOwner(), this, CurrentAmmo);
 }
 
 void ASWeaponBase::StartFire()
@@ -94,7 +101,19 @@ bool ASWeaponBase::ServerFire_Validate()
 	return true;
 }
 
+void ASWeaponBase::OnRep_CurrentAmmo()
+{
+	OnAmmoChanged.Broadcast(GetOwner(), this, CurrentAmmo);
+}
+
 void ASWeaponBase::OnOwnerDestory(AActor* DiedActor)
 {
 	Destroy();
+}
+
+void ASWeaponBase::GetLifetimeReplicatedProps( TArray< class FLifetimeProperty > & OutLifetimeProps ) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME_CONDITION(ASWeaponBase, CurrentAmmo, COND_SkipOwner);
 }

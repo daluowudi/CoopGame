@@ -6,10 +6,13 @@
 #include "GameFramework/Character.h"
 #include "SCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWeaponChangedSignature, class AActor*, Owner, class ASWeaponBase*, OldWeapon, class ASWeaponBase*, NewWeapon);
+
 class UCameraComponent;
 class USpringArmComponent;
 class ASWeaponBase;
 class USHealthComponent;
+class UAnimMontage;
 
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter
@@ -36,6 +39,13 @@ protected:
 
 	void UnZoom();
 
+	void DoReload();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerReload();
+
+	void FinishReload();
+
 	UFUNCTION()
 	void OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
@@ -57,14 +67,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Player", meta = (ClampMin = 0.1, ClampMax = 100))
 	float ZoomSpeed;
 
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
+	UPROPERTY(ReplicatedUsing=OnRep_CurrentWeapon, VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
 	ASWeaponBase* CurrentWeapon;
+
+	UFUNCTION()
+	void OnRep_CurrentWeapon(ASWeaponBase* OldWeapon);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<ASWeaponBase> StaterWeaponClass;
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
-	bool bDied;
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	UAnimMontage* ReloadAnim;
 
 	bool bIsZoomed;
 
@@ -80,6 +93,18 @@ public:
 
 	virtual FVector GetPawnViewLocation() const override;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnWeaponChangedSignature OnWeaponChanged;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
+	bool IsDied;
+
+	UPROPERTY(ReplicatedUsing=OnRep_bReloading, BlueprintReadOnly, Category = "Player")
+	bool bReloading;
+
+	UFUNCTION()
+	void OnRep_bReloading(bool OldReloading);
+
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void StartFire();
 
@@ -87,4 +112,8 @@ public:
 	void StopFire();
 
 	void RealDied();
+
+	virtual float PlayAnimMontage(UAnimMontage* AnimMontage, float InPlayRate = 1.f, FName StartSectionName = NAME_None) override;
+
+	virtual void StopAnimMontage(UAnimMontage* AnimMontage) override;
 };
